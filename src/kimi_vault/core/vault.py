@@ -1,7 +1,5 @@
 """
-Encryption/decryption operations using age
-
-Requires age to be installed: https://age-encryption.org
+Core vault operations - encryption/decryption with age
 """
 
 import subprocess
@@ -16,13 +14,28 @@ class VaultCryptoError(Exception):
     pass
 
 
-class VaultCrypto:
-    """Handles age encryption and decryption for the vault"""
+class Vault:
+    """
+    Core vault for managing encrypted secrets.
     
-    def __init__(self, key_file: Optional[Union[str, Path]] = None):
-        from .config import get_config
-        self.config = get_config()
-        self.key_file = Path(key_file) if key_file else self.config.key_file
+    This is the low-level encryption layer - no business logic,
+    just encrypt/decrypt with age.
+    """
+    
+    def __init__(
+        self,
+        key_file: Optional[Union[str, Path]] = None,
+        vault_dir: Optional[Union[str, Path]] = None
+    ):
+        """
+        Initialize vault.
+        
+        Args:
+            key_file: Path to age private key (default: ~/.kimi-vault/key.txt)
+            vault_dir: Directory for vault files (default: ~/.kimi-vault)
+        """
+        self.vault_dir = Path(vault_dir).expanduser() if vault_dir else Path.home() / ".kimi-vault"
+        self.key_file = Path(key_file).expanduser() if key_file else self.vault_dir / "key.txt"
         self.key_pub_file = Path(str(self.key_file) + ".pub")
     
     def _check_age_installed(self):
@@ -43,6 +56,9 @@ class VaultCrypto:
                 f"Key file already exists: {self.key_file}\n"
                 "Delete it first if you want to generate a new key."
             )
+        
+        # Ensure vault directory exists
+        self.vault_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
         
         try:
             result = subprocess.run(
@@ -90,31 +106,31 @@ class VaultCrypto:
     
     def encrypt(
         self,
-        input_file: Union[str, Path],
-        output_file: Optional[Union[str, Path]] = None,
+        plaintext_path: Union[str, Path],
+        ciphertext_path: Optional[Union[str, Path]] = None,
         recipient: Optional[str] = None
     ) -> Path:
         """
-        Encrypt a file using age
+        Encrypt a file using age.
         
         Args:
-            input_file: File to encrypt
-            output_file: Output file (default: input_file + ".age")
-            recipient: Public key to encrypt to (default: use self key)
+            plaintext_path: File to encrypt
+            ciphertext_path: Output file (default: input + ".age")
+            recipient: Public key to encrypt to (default: self)
         
         Returns:
             Path to encrypted file
         """
         self._check_age_installed()
         
-        input_path = Path(input_file)
+        input_path = Path(plaintext_path).expanduser()
         if not input_path.exists():
             raise VaultCryptoError(f"Input file not found: {input_path}")
         
-        if output_file is None:
+        if ciphertext_path is None:
             output_path = Path(str(input_path) + ".age")
         else:
-            output_path = Path(output_file)
+            output_path = Path(ciphertext_path).expanduser()
         
         pub_key = recipient or self.get_public_key()
         
@@ -130,35 +146,35 @@ class VaultCrypto:
     
     def decrypt(
         self,
-        input_file: Union[str, Path],
-        output_file: Optional[Union[str, Path]] = None
+        ciphertext_path: Union[str, Path],
+        plaintext_path: Optional[Union[str, Path]] = None
     ) -> Path:
         """
-        Decrypt a file using age
+        Decrypt a file using age.
         
         Args:
-            input_file: File to decrypt (.age file)
-            output_file: Output file (default: tempfile)
+            ciphertext_path: File to decrypt (.age file)
+            plaintext_path: Output file (default: secure tempfile)
         
         Returns:
             Path to decrypted file
         """
         self._check_age_installed()
         
-        input_path = Path(input_file)
+        input_path = Path(ciphertext_path).expanduser()
         if not input_path.exists():
             raise VaultCryptoError(f"Encrypted file not found: {input_path}")
         
         if not self.key_file.exists():
             raise VaultCryptoError(f"Private key not found: {self.key_file}")
         
-        if output_file is None:
+        if plaintext_path is None:
             # Create secure temp file
             fd, output_path = tempfile.mkstemp(prefix="kimi-vault-secrets-", suffix=".json")
             os.close(fd)
             output_path = Path(output_path)
         else:
-            output_path = Path(output_file)
+            output_path = Path(plaintext_path).expanduser()
         
         try:
             subprocess.run(
@@ -166,22 +182,24 @@ class VaultCrypto:
                 capture_output=True,
                 check=True
             )
+            # Secure the temp file
+            os.chmod(output_path, 0o600)
             return output_path
         except subprocess.CalledProcessError as e:
             # Clean up temp file on failure
-            if output_file is None and output_path.exists():
+            if plaintext_path is None and output_path.exists():
                 output_path.unlink()
             raise VaultCryptoError(f"Decryption failed: {e.stderr.decode()}")
     
-    def decrypt_to_memory(self, input_file: Union[str, Path]) -> str:
+    def decrypt_to_string(self, ciphertext_path: Union[str, Path]) -> str:
         """
-        Decrypt a file and return contents as string
+        Decrypt a file and return contents as string.
         
-        Warning: Be careful with this - secrets will be in memory
+        Warning: Be careful - secrets will be in memory.
         """
         self._check_age_installed()
         
-        input_path = Path(input_file)
+        input_path = Path(ciphertext_path).expanduser()
         if not input_path.exists():
             raise VaultCryptoError(f"Encrypted file not found: {input_path}")
         
@@ -198,9 +216,9 @@ class VaultCrypto:
 
 def secure_delete(file_path: Union[str, Path]):
     """
-    Securely delete a file using shred if available, otherwise regular delete
+    Securely delete a file using shred if available, otherwise regular delete.
     """
-    path = Path(file_path)
+    path = Path(file_path).expanduser()
     if not path.exists():
         return
     

@@ -1,5 +1,5 @@
 """
-Configuration management for Kimi Secrets Vault
+Configuration management for Kimi Vault
 
 Supports configuration via:
 1. Environment variables (KIMI_VAULT_*)
@@ -25,8 +25,6 @@ class VaultConfig:
         self._config_file: Optional[Path] = None
         self._key_file: Optional[Path] = None
         self._secrets_file: Optional[Path] = None
-        self._client_id: Optional[str] = None
-        self._client_secret: Optional[str] = None
         self._load_config()
     
     def _load_config(self):
@@ -55,16 +53,6 @@ class VaultConfig:
             "KIMI_VAULT_SECRETS",
             config_values.get("secrets_file"),
             self._vault_dir / "secrets.json.age"
-        )
-        
-        # OAuth credentials (these can be in config or env)
-        self._client_id = os.environ.get(
-            "KIMI_VAULT_CLIENT_ID",
-            config_values.get("client_id")
-        )
-        self._client_secret = os.environ.get(
-            "KIMI_VAULT_CLIENT_SECRET",
-            config_values.get("client_secret")
         )
     
     def _get_path_from_env(self, env_var: str, default: str) -> Path:
@@ -123,21 +111,6 @@ class VaultConfig:
     def secrets_file(self) -> Path:
         """Path to encrypted secrets file"""
         return self._secrets_file
-    
-    @property
-    def client_id(self) -> Optional[str]:
-        """OAuth client ID for Gmail API"""
-        return self._client_id
-    
-    @property
-    def client_secret(self) -> Optional[str]:
-        """OAuth client secret for Gmail API"""
-        return self._client_secret
-    
-    @property
-    def has_oauth_credentials(self) -> bool:
-        """Check if OAuth credentials are configured"""
-        return bool(self._client_id and self._client_secret)
     
     def ensure_directories(self):
         """Create necessary directories if they don't exist"""
