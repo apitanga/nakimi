@@ -391,4 +391,4 @@ class TestCLIExecution:
             sys.stdout = sys.__stdout__
         
         output = captured_output.getvalue()
-        assert "session" in output
+        assert "session" in output# Test comment
