@@ -20,39 +20,6 @@ plugins:
 just_the_docs:
   # Navigation configuration
   nav_folders: true
-  nav:
-    - title: HOME
-      url: /
-    - title: Getting Started
-      children:
-        - title: Installation
-          url: /getting-started/INSTALL.html
-    - title: Plugins
-      children:
-        - title: Gmail Setup
-          url: /plugins/GMAIL_SETUP.html
-    - title: Development
-      children:
-        - title: Plugin Development
-          url: /development/PLUGIN_DEVELOPMENT.html
-        - title: Architecture
-          url: /development/ARCHITECTURE.html
-        - title: Testing Guide
-          url: /development/TESTS.html
-        - title: ADR
-          url: /development/ADR.html
-        - title: Git Hooks
-          url: /development/GIT_HOOKS.html
-    - title: Security
-      url: /security/
-    - title: API Reference
-      url: /api/
-    - title: Project
-      children:
-        - title: Grade Report
-          url: /project/GRADE_REPORT.html
-        - title: Roadmap
-          url: /project/ROADMAP.html
   
   # Search configuration
   search_enabled: true
