@@ -1,3 +1,8 @@
+---
+title: Security Documentation
+nav_order: 80
+---
+
 # Security Documentation
 
 ## Overview

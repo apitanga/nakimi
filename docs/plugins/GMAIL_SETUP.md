@@ -1,3 +1,8 @@
+---
+title: Gmail Plugin Setup Guide
+nav_order: 20
+---
+
 # Gmail Plugin Setup Guide
 
 This guide walks you through setting up the Gmail plugin for kimi-secrets-vault.

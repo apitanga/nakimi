@@ -1,4 +1,9 @@
-# Kimi Secrets Vault - Development Roadmap 2026
+---
+title: Development Roadmap 2026
+nav_order: 110
+---
+
+# Development Roadmap 2026
 
 ## Vision & Principles
 

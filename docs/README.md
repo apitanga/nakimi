@@ -1,3 +1,8 @@
+---
+title: Kimi Secrets Vault Documentation
+nav_order: 0
+---
+
 # Kimi Secrets Vault Documentation
 
 ## Overview

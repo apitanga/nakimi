@@ -1,4 +1,9 @@
-# Kimi Secrets Vault - Comprehensive Grade Report
+---
+title: Comprehensive Grade Report
+nav_order: 100
+---
+
+# Comprehensive Grade Report
 
 ## Project Overview
 **Project**: kimi-secrets-vault  

@@ -1,3 +1,8 @@
+---
+title: Testing Guide
+nav_order: 50
+---
+
 # Testing Guide
 
 Complete guide to testing kimi-secrets-vault, including architecture, patterns, and lessons learned.

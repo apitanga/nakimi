@@ -1,3 +1,8 @@
+---
+title: Git Hooks for Test Protection
+nav_order: 70
+---
+
 # Git Hooks for Test Protection
 
 This project includes git hooks to ensure code quality and prevent pushing broken code to remote repositories.

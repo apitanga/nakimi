@@ -1,3 +1,8 @@
+---
+title: Architecture Decision Records
+nav_order: 60
+---
+
 # Architecture Decision Records
 
 Key design decisions and their rationale for kimi-secrets-vault.

@@ -25,23 +25,23 @@ just_the_docs:
     - title: Getting Started
       children:
         - title: Installation
-          url: /getting-started/INSTALL
+          url: /getting-started/INSTALL.html
     - title: Plugins
       children:
         - title: Gmail Setup
-          url: /plugins/GMAIL_SETUP
+          url: /plugins/GMAIL_SETUP.html
     - title: Development
       children:
         - title: Plugin Development
-          url: /development/PLUGIN_DEVELOPMENT
+          url: /development/PLUGIN_DEVELOPMENT.html
         - title: Architecture
-          url: /development/ARCHITECTURE
+          url: /development/ARCHITECTURE.html
         - title: Testing Guide
-          url: /development/TESTS
+          url: /development/TESTS.html
         - title: ADR
-          url: /development/ADR
+          url: /development/ADR.html
         - title: Git Hooks
-          url: /development/GIT_HOOKS
+          url: /development/GIT_HOOKS.html
     - title: Security
       url: /security/
     - title: API Reference
@@ -49,9 +49,9 @@ just_the_docs:
     - title: Project
       children:
         - title: Grade Report
-          url: /project/GRADE_REPORT
+          url: /project/GRADE_REPORT.html
         - title: Roadmap
-          url: /project/ROADMAP
+          url: /project/ROADMAP.html
   
   # Search configuration
   search_enabled: true

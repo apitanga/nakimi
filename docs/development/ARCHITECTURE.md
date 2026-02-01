@@ -1,3 +1,8 @@
+---
+title: Architecture
+nav_order: 40
+---
+
 # Architecture
 
 System design and implementation of kimi-secrets-vault.

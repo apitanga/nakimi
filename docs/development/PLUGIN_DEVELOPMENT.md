@@ -1,3 +1,8 @@
+---
+title: Plugin Development Guide
+nav_order: 30
+---
+
 # Plugin Development Guide
 
 Creating plugins for kimi-secrets-vault is straightforward. This guide walks through the process.
