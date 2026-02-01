@@ -1,0 +1,48 @@
+# GitHub Pages configuration for Kimi Secrets Vault documentation
+title: Kimi Secrets Vault
+description: Secure, plugin-based API credential management for AI assistants
+theme: jekyll-theme-cayman
+
+# Exclude files from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/bundle/
+
+# Plugin settings
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# Site settings
+url: "https://apitanga.github.io"
+baseurl: "/kimi-secrets-vault"
+repository: "apitanga/kimi-secrets-vault"
+
+# Navigation
+header_pages:
+  - README.md
+  - getting-started/INSTALL.md
+  - plugins/GMAIL_SETUP.md
+  - development/PLUGIN_DEVELOPMENT.md
+  - development/ARCHITECTURE.md
+  - development/TESTS.md
+  - development/ADR.md
+  - security/README.md
+  - api/README.md
+  - project/GRADE_REPORT.md
+  - project/ROADMAP.md
+
+# Build settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+
+# Optional: Add analytics
+# google_analytics: UA-XXXXX-Y
+
+# Optional: Add social links
+# twitter_username: yourtwitter
+# github_username:  apitanga

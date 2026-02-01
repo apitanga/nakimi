@@ -202,6 +202,17 @@ The vault automatically:
 - Makes them available to the Gmail plugin
 - Securely shreds them when you exit
 
+## Gmail Commands Reference
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `gmail.profile` | Show your Gmail profile | `kimi-vault gmail.profile` |
+| `gmail.unread [limit]` | List unread emails (default: 10) | `kimi-vault gmail.unread 5` |
+| `gmail.labels` | List all labels | `kimi-vault gmail.labels` |
+| `gmail.search <query>` | Search emails | `kimi-vault gmail.search "from:google"` |
+| `gmail.send <to> <subject> <body>` | Send an email | `kimi-vault gmail.send "test@example.com" "Hi" "Hello"` |
+| `gmail.draft <to> <subject> <body>` | Create a draft | `kimi-vault gmail.draft "test@example.com" "Draft" "Content"` |
+
 ## Troubleshooting
 
 ### "Access blocked: app not verified"
@@ -260,6 +271,6 @@ age -d -i ~/.kimi-vault/key.txt ~/.kimi-vault/secrets.json.age | \
 
 ## Next Steps
 
-- See the main [README.md](../README.md) for full plugin documentation
-- Learn how to create [custom plugins](../README.md#creating-a-plugin)
-- Set up additional plugins (Calendar coming soon)
+- Learn how to create [custom plugins](../development/PLUGIN_DEVELOPMENT.md)
+- Set up additional plugins (Calendar, GitHub coming soon)
+- Review the [Architecture](../development/ARCHITECTURE.md) to understand security model

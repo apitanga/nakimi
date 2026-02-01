@@ -1,0 +1,301 @@
+# Architecture Decision Records
+
+Key design decisions and their rationale for kimi-secrets-vault.
+
+---
+
+### ADR-001: Why age over GPG?
+
+**Status**: Accepted
+
+**Context**:
+- Need encrypted storage for API credentials
+- GPG is complex, hard to use correctly
+- age is modern, simple, auditable
+
+**Decision**: Use [age](https://age-encryption.org) for encryption
+
+**Consequences**:
+- ✅ Simple key management (one file)
+- ✅ Fast encryption/decryption
+- ✅ No trust web complexity
+- ❌ Requires `age` CLI tool (external dependency)
+
+**Alternatives Considered**:
+- **GPG**: Too complex, poor UX
+- **Python cryptography library**: Would need to manage keys ourselves
+- **AWS KMS**: Vendor lock-in, requires AWS account
+
+---
+
+### ADR-002: Plugin Auto-Discovery
+
+**Status**: Accepted
+
+**Context**:
+- Don't want to manually register plugins
+- Plugin availability should depend on credentials
+- DRY principle: credentials define what's available
+
+**Decision**: Auto-discover plugins based on `secrets.json` keys
+
+**Implementation**:
+```python
+# Plugin loads if secrets.json contains matching key
+{
+  "gmail": { ... },      # GmailPlugin loads
+  "calendar": { ... }    # CalendarPlugin loads
+}
+```
+
+**Consequences**:
+- ✅ No manual plugin registration
+- ✅ Adding credentials = plugin auto-loads
+- ✅ Missing credentials = plugin doesn't load
+- ❌ Plugin name must match secrets key (convention)
+
+**Alternatives Considered**:
+- **Manual registration**: Too much boilerplate
+- **Config file**: Extra file to maintain
+
+---
+
+### ADR-003: Just-in-Time Decryption
+
+**Status**: Accepted
+
+**Context**:
+- Don't want secrets in memory longer than needed
+- Decrypting at startup = secrets exposed for entire session
+- Decrypting per-command = too slow
+
+**Decision**: Decrypt secrets to temp file at session start, shred at session end
+
+**Implementation**:
+```python
+# Session mode
+vault.decrypt()  # Decrypt to temp file
+# ... use plugins (read from temp file)
+vault.cleanup()  # Shred temp file
+
+# Command mode
+with vault.session():
+    plugin.execute()  # Auto-decrypt + auto-cleanup
+```
+
+**Consequences**:
+- ✅ Secrets only exposed during session
+- ✅ Fast plugin access (no per-command decryption)
+- ✅ Auto-cleanup on exit
+- ❌ Temp file exists during session (mitigated by strict permissions)
+
+**Alternatives Considered**:
+- **Decrypt per-command**: Too slow
+- **Keep in memory**: Higher attack surface
+- **Decrypt at startup**: Secrets exposed for entire process lifetime
+
+---
+
+### ADR-004: CLI Command Syntax
+
+**Status**: Accepted
+
+**Context**:
+- Need intuitive CLI syntax
+- Multiple plugins with multiple commands
+- Don't want nested subcommands
+
+**Decision**: Use `plugin.command` syntax
+
+**Examples**:
+```bash
+kimi-vault gmail.unread
+kimi-vault gmail.search "query"
+kimi-vault calendar.today
+kimi-vault github.issues
+```
+
+**Consequences**:
+- ✅ Clear, readable syntax
+- ✅ No deep nesting
+- ✅ Easy to discover (tab completion friendly)
+- ❌ Can't have commands with dots in name (non-issue in practice)
+
+**Alternatives Considered**:
+- **Subcommands**: `kimi-vault gmail unread` (more typing, less clear)
+- **Flags**: `kimi-vault --plugin=gmail --command=unread` (too verbose)
+- **Combined**: `kimi-vault gmail-unread` (loses semantic grouping)
+
+---
+
+### ADR-005: Secure Deletion with shred
+
+**Status**: Accepted
+
+**Context**:
+- `rm` doesn't actually delete file data
+- Temp files could be recovered from disk
+- Need to prevent credential leakage
+
+**Decision**: Use `shred -u` to securely delete temp files
+
+**Implementation**:
+```python
+def secure_delete(path: str):
+    """Securely delete file (shred, not rm)"""
+    subprocess.run(['shred', '-u', path], check=True)
+```
+
+**Consequences**:
+- ✅ Prevents file recovery from disk
+- ✅ Defense in depth
+- ❌ Requires `shred` utility (standard on Linux/macOS)
+
+**Alternatives Considered**:
+- **os.remove()**: Doesn't overwrite data
+- **Manual overwrite**: Complex, error-prone
+
+---
+
+### ADR-006: Plugin Base Class Pattern
+
+**Status**: Accepted
+
+**Context**:
+- Need consistent plugin interface
+- Want to enforce required methods
+- Python doesn't have interfaces
+
+**Decision**: Use abstract base class with required properties/methods
+
+**Implementation**:
+```python
+from abc import ABC, abstractmethod
+
+class Plugin(ABC):
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        pass
+
+    @abstractmethod
+    def get_commands(self) -> list[PluginCommand]:
+        pass
+```
+
+**Consequences**:
+- ✅ Enforces plugin contract
+- ✅ Clear interface for plugin developers
+- ✅ Runtime validation
+- ❌ More boilerplate than duck typing
+
+**Alternatives Considered**:
+- **Duck typing**: No enforcement, easy to break
+- **Protocol (typing.Protocol)**: Runtime checks require isinstance, not auto-enforced
+
+---
+
+### ADR-007: Separate Client Classes
+
+**Status**: Accepted (for complex APIs)
+
+**Context**:
+- Gmail plugin has complex OAuth flow
+- API client logic mixed with CLI logic = messy
+- Want to reuse client outside plugin context
+
+**Decision**: Separate API client from plugin (for complex integrations)
+
+**Structure**:
+```
+plugins/gmail/
+├── plugin.py      # CLI interface (thin wrapper)
+└── client.py      # API client (OAuth, API calls)
+```
+
+**When to use**:
+- ✅ Complex API (OAuth, pagination, retries)
+- ✅ Reusable client (might use outside plugin)
+- ❌ Simple API (single HTTP call) - keep in plugin.py
+
+**Consequences**:
+- ✅ Clean separation of concerns
+- ✅ Reusable API client
+- ✅ Plugin focuses on CLI interface
+- ❌ Extra file for simple plugins
+
+---
+
+### ADR-008: Environment Variables for Config
+
+**Status**: Accepted
+
+**Context**:
+- Need configurable paths (vault dir, key file)
+- Config file adds complexity
+- Environment variables are standard
+
+**Decision**: Use environment variables with sensible defaults
+
+**Implementation**:
+```python
+VAULT_DIR = os.getenv('KIMI_VAULT_DIR', os.path.expanduser('~/.kimi-vault'))
+KEY_FILE = os.getenv('KIMI_VAULT_KEY', f'{VAULT_DIR}/key.txt')
+```
+
+**Consequences**:
+- ✅ No config file needed
+- ✅ Easy to override
+- ✅ Standard pattern
+- ❌ Less discoverable than config file (mitigated by documentation)
+
+---
+
+### ADR-009: Python Package Structure
+
+**Status**: Accepted
+
+**Context**:
+- Want installable package
+- Need proper distribution
+- Eventually publish to PyPI
+
+**Decision**: Use modern Python packaging (pyproject.toml + setuptools)
+
+**Structure**:
+```
+kimi-secrets-vault/
+├── src/kimi_vault/    # Source code
+├── tests/             # Tests
+├── pyproject.toml     # Package metadata
+└── install.sh         # Convenience installer
+```
+
+**Consequences**:
+- ✅ Standard Python packaging
+- ✅ Ready for PyPI
+- ✅ Editable install for development
+- ✅ Proper dependency management
+
+**Alternatives Considered**:
+- **setup.py**: Deprecated in favor of pyproject.toml
+- **Poetry**: Too opinionated, adds complexity
+
+---
+
+### ADR-010: No Database
+
+**Status**: Accepted
+
+**Context**:
+- Could use SQLite to store metadata (last refresh, etc.)
+- Adds complexity, attack surface
+- File-based approach is simpler
+
+**Decision**: No database, use encrypted JSON file
+
+**Consequences**:
+- ✅ Simple, auditable
+- ✅ Easy to backup (one file)
+- ✅ No database dependencies
+- ❌ Limited query capabilities (not needed for this use case)

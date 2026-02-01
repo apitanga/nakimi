@@ -163,7 +163,7 @@ age -r $(cat ~/.kimi-vault/key.txt.pub) \
 shred -u ~/.kimi-vault/secrets.json
 ```
 
-See [docs/GMAIL_SETUP.md](docs/GMAIL_SETUP.md) for detailed Gmail OAuth instructions.
+See [docs/plugins/GMAIL_SETUP.md](docs/plugins/GMAIL_SETUP.md) for detailed Gmail OAuth instructions.
 
 ### 4. Use It
 
@@ -513,7 +513,7 @@ cd kimi-secrets-vault
 pip install -e .  # Editable install
 ```
 
-See [docs/INSTALL.md](docs/INSTALL.md) for detailed instructions.
+See [docs/getting-started/INSTALL.md](docs/getting-started/INSTALL.md) for detailed instructions.
 
 ## Roadmap
 

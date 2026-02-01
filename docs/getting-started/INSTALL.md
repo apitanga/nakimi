@@ -34,6 +34,15 @@ sudo mv age/age /usr/local/bin/
 sudo mv age/age-keygen /usr/local/bin/
 ```
 
+### Windows
+```bash
+# Using Scoop
+scoop install age
+
+# Using Chocolatey
+choco install age
+```
+
 ### Verify installation
 ```bash
 age --version
@@ -45,7 +54,7 @@ age --version
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/kimi-secrets-vault.git
+git clone https://github.com/apitanga/kimi-secrets-vault.git
 cd kimi-secrets-vault
 
 # Run the installer
@@ -62,7 +71,7 @@ This will:
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/kimi-secrets-vault.git
+git clone https://github.com/apitanga/kimi-secrets-vault.git
 cd kimi-secrets-vault
 
 # Create virtual environment (recommended)
@@ -100,45 +109,64 @@ cat > ~/.config/kimi-vault/config << 'EOF'
 EOF
 ```
 
-## Step 5: Set Up Plugins
+## Step 5: Add Your First Secret
+
+1. Create or edit secrets template:
+```bash
+# Copy template
+cp config/secrets.template.json ~/.kimi-vault/secrets.json
+
+# Edit with your credentials
+vim ~/.kimi-vault/secrets.json
+```
+
+2. Encrypt the secrets:
+```bash
+age -r $(cat ~/.kimi-vault/key.txt.pub) \
+  -o ~/.kimi-vault/secrets.json.age \
+  ~/.kimi-vault/secrets.json
+
+# Securely delete plaintext
+shred -u ~/.kimi-vault/secrets.json
+```
+
+## Step 6: Set Up Plugins
 
 Plugins are loaded automatically when you add their credentials to the vault.
 
+### Available Plugins
+
+| Plugin | Status | Description |
+|--------|--------|-------------|
+| **Gmail** | ✅ Ready | Read and send emails |
+| **Calendar** | 🚧 Planned | Google Calendar integration |
+| **GitHub** | 🚧 Planned | GitHub API access |
+
 ### Gmail Plugin
+To enable the Gmail plugin, see [Gmail Setup Guide](../plugins/GMAIL_SETUP.md).
 
-To enable the Gmail plugin:
+## Step 7: Test Your Installation
 
-1. Set up Gmail API credentials (see [GMAIL_SETUP.md](GMAIL_SETUP.md))
+```bash
+# Check CLI is available
+kimi-vault --help
 
-2. Add credentials to your secrets:
-   ```bash
-   # Copy template
-   cp config/secrets.template.json ~/.kimi-vault/secrets.json
-   
-   # Edit with your credentials
-   vim ~/.kimi-vault/secrets.json
-   ```
+# Test vault initialization
+kimi-vault init --check
 
-3. Encrypt the secrets:
-   ```bash
-   age -r $(cat ~/.kimi-vault/key.txt.pub) \
-     -o ~/.kimi-vault/secrets.json.age \
-     ~/.kimi-vault/secrets.json
-   
-   # Securely delete plaintext
-   shred -u ~/.kimi-vault/secrets.json
-   ```
+# Check which plugins are available
+kimi-vault plugins list
 
-4. Verify the plugin loads:
-   ```bash
-   kimi-vault plugins list
-   # Output: gmail - Gmail integration - read, search, and send emails
-   ```
+# List available commands
+kimi-vault plugins commands
 
-5. Test it:
-   ```bash
-   kimi-vault gmail.profile
-   ```
+# Start a secure session
+kimi-vault session
+
+# Inside session, test commands
+$ kimi-vault gmail.profile
+$ kimi-vault gmail.unread 5
+```
 
 ## Verification
 
@@ -233,6 +261,7 @@ pip install google-auth google-auth-oauthlib google-api-python-client
 
 ## Next Steps
 
-- Read [GMAIL_SETUP.md](GMAIL_SETUP.md) to set up Gmail API access
-- See the main [README.md](../README.md) for usage examples
-- Learn how to [create custom plugins](../README.md#creating-a-plugin)
+- Read [Gmail Plugin Setup](../plugins/GMAIL_SETUP.md) to set up Gmail API access
+- Learn how to [create custom plugins](../development/PLUGIN_DEVELOPMENT.md)
+- Review the [Architecture](../development/ARCHITECTURE.md) to understand the system design
+- Check [Testing Guide](../development/TESTS.md) for development practices
