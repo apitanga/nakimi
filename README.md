@@ -1,92 +1,172 @@
 # 🔐 Kimi Secrets Vault
 
-Secure, just-in-time access to API credentials with modern encryption.
+Give AI assistants secure access to your APIs without exposing plaintext credentials.
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Features
+## What is this?
 
-- 🔐 **Modern Encryption** - Uses [age](https://age-encryption.org) for simple, secure encryption
-- ⏱️ **Just-in-Time Decryption** - Secrets decrypted only when needed, cleaned up automatically
-- 🔄 **Auto-Refresh Tokens** - Gmail OAuth tokens refresh automatically before expiry
-- 🛡️ **Secure Cleanup** - Secrets are shredded (not just deleted) when done
-- 🔧 **Configurable** - Environment variables or config file
-- 🤖 **AI-Ready** - Designed for use with AI assistants like Kimi, Claude, etc.
+A secure vault that stores your API credentials encrypted at rest, decrypts them just-in-time for AI assistant sessions, and automatically cleans up when done.
+
+**Current integrations:**
+- ✅ Gmail (read, compose, send)
+
+**Future integrations:**
+- 🚧 Google Calendar
+- 🚧 GitHub API
+- 🚧 Custom APIs
+
+## Why?
+
+When using AI assistants (Kimi, Claude, etc.), you might want them to:
+- Check your unread emails
+- Look up your calendar
+- Query your GitHub issues
+
+But you shouldn't paste credentials into chat. This vault lets assistants access APIs **securely** through encrypted storage + temporary decryption.
+
+## How It Works
+
+```
+At Rest                    In Session                    Cleanup
+─────────────────────────────────────────────────────────────────────
+secrets.json.age    →    /tmp/secrets.json    →    securely shredded
+(encrypted)              (temporary only)          (session end)
+     ↑                           ↓
+     └───────────────────────────┘
+        AI assistant uses APIs
+        via temporary credentials
+```
+
+**Security features:**
+- 🔐 [age](https://age-encryption.org) encryption - modern, simple, secure
+- ⏱️ Just-in-time decryption - secrets exposed only when needed
+- 🧹 Automatic cleanup - secrets shredded (not just deleted) on exit
+- 🔄 Token refresh - OAuth tokens refreshed before expiry
 
 ## Quick Start
 
 ### 1. Install
 
 ```bash
-# Clone the repository
 git clone https://github.com/YOUR_USERNAME/kimi-secrets-vault.git
 cd kimi-secrets-vault
-
-# Run the installer
 ./install.sh
-
-# Or install manually
-pip install -e .
 ```
 
 ### 2. Initialize Vault
 
 ```bash
-# Generate encryption key
+# Generate encryption key pair
 kimi-vault init
+
+# Output:
+# 🔐 Generating new age key pair...
+# ✅ Key generated!
+#    Private key: ~/.kimi-vault/key.txt
+#    Public key: age1...
+#
+# ⚠️  IMPORTANT: Back up your private key!
 ```
 
-### 3. Set Up Gmail (optional)
+### 3. Add API Credentials
 
-See [docs/GMAIL_SETUP.md](docs/GMAIL_SETUP.md) for detailed Gmail API setup.
+**For Gmail** (see [docs/GMAIL_SETUP.md](docs/GMAIL_SETUP.md) for detailed instructions):
 
-Quick version:
-1. Get OAuth credentials from [Google Cloud Console](https://console.cloud.google.com/)
-2. Run `kimi-vault-oauth` to get a refresh token
-3. Add credentials to `~/.kimi-vault/secrets.json`
-4. Encrypt: `age -r $(cat ~/.kimi-vault/key.txt.pub) -o secrets.json.age secrets.json`
-5. Secure delete: `shred -u secrets.json`
+```bash
+# 1. Copy template
+cp config/secrets.template.json ~/.kimi-vault/secrets.json
 
-### 4. Use It
+# 2. Edit with your credentials
+vim ~/.kimi-vault/secrets.json
+
+# 3. Encrypt
+age -r $(cat ~/.kimi-vault/key.txt.pub) \
+  -o ~/.kimi-vault/secrets.json.age \
+  ~/.kimi-vault/secrets.json
+
+# 4. Securely delete plaintext
+shred -u ~/.kimi-vault/secrets.json
+```
+
+### 4. Use with AI Assistant
 
 ```bash
 # Start a secure session
 kimi-vault-session
 
-# Inside the session, use the CLI
-kimi-vault unread
-kimi-vault search "from:boss"
+# Inside the session:
+$ kimi-vault unread           # List unread emails
+$ kimi-vault search "from:boss" # Search emails
+```
 
-# Or use Python
-python3 -c "
+Or use Python directly:
+
+```python
 from kimi_vault import GmailClient
+
 client = GmailClient()
-for email in client.list_unread():
-    print(f'{email['subject']} from {email['from']}')
-"
+emails = client.list_unread()
+for email in emails:
+    print(f"{email['subject']} from {email['from']}")
 ```
 
-## How It Works
+## Architecture
+
+The vault is designed to be **extensible**. Each API integration follows this pattern:
 
 ```
-┌─────────────────┐
-│  secrets.json   │  ← Your plaintext secrets (temporary)
-│   (in /tmp/)    │
-└────────┬────────┘
-         │ Decrypt on session start
-         ▼
-┌─────────────────┐
-│ secrets.json.age│  ← Encrypted at rest
-│  (in ~/.kimi-vault/)
-└────────┬────────┘
-         │ Age encryption
-         ▼
-┌─────────────────┐
-│    key.txt      │  ← Your private key (guard this!)
-│  (in ~/.kimi-vault/)
-└─────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                    Vault Core                           │
+│  ┌─────────────┐  ┌──────────────┐  ┌────────────────┐ │
+│  │   Config    │  │    Crypto    │  │  Session Mgmt  │ │
+│  │  (paths,    │  │  (age enc/   │  │  (env vars,    │ │
+│  │   env vars) │  │   dec)       │  │   cleanup)     │ │
+│  └──────┬──────┘  └──────┬───────┘  └───────┬────────┘ │
+└─────────┼────────────────┼──────────────────┼──────────┘
+          │                │                  │
+          └────────────────┴──────────────────┘
+                           │
+          ┌────────────────┼────────────────┐
+          ▼                ▼                ▼
+    ┌──────────┐    ┌──────────┐    ┌──────────┐
+    │  Gmail   │    │ Calendar │    │  GitHub  │
+    │  Client  │    │  (todo)  │    │  (todo)  │
+    └──────────┘    └──────────┘    └──────────┘
 ```
+
+### Adding a New API Integration
+
+To add a new service (e.g., Google Calendar):
+
+1. **Add credentials to secrets template:**
+   ```json
+   {
+     "calendar": {
+       "client_id": "...",
+       "client_secret": "...",
+       "refresh_token": "..."
+     }
+   }
+   ```
+
+2. **Create a client class:**
+   ```python
+   # src/kimi_vault/calendar_client.py
+   from .client import BaseOAuthClient
+   
+   class CalendarClient(BaseOAuthClient):
+       SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
+       # ... implement methods
+   ```
+
+3. **Add CLI commands:**
+   ```python
+   # In cli.py
+   elif args.command == "calendar":
+       events = calendar_client.list_events()
+   ```
 
 ## Configuration
 
@@ -105,101 +185,158 @@ for email in client.list_unread():
 Create `~/.config/kimi-vault/config`:
 
 ```bash
-# Example config
+# Paths
+vault_dir = ~/.kimi-vault
+key_file = ~/.kimi-vault/key.txt
+
+# OAuth credentials (optional)
 client_id = your-client-id.apps.googleusercontent.com
 client_secret = your-client-secret
-vault_dir = ~/.kimi-vault
 ```
 
 ## CLI Reference
 
+### Vault Management
+
 ```bash
-# Initialize vault (generate key)
-kimi-vault init
+kimi-vault init              # Initialize vault, generate keys
+kimi-vault-session           # Start secure session
+kimi-vault-oauth             # Get OAuth refresh tokens
+```
 
-# List unread emails
-kimi-vault unread
+### Gmail (Current Integration)
 
-# Search emails
-kimi-vault search "from:boss@example.com"
+```bash
+kimi-vault unread [OPTIONS]
+  -n, --limit INTEGER  Maximum emails to show [default: 10]
 
-# List labels
-kimi-vault labels
+kimi-vault search QUERY [OPTIONS]
+  -n, --limit INTEGER  Maximum emails to show [default: 10]
 
-# Show profile
-kimi-vault profile
+kimi-vault labels            # List Gmail labels
+kimi-vault profile           # Show Gmail profile
 
-# Create draft
-kimi-vault draft to@example.com "Subject" "Body text"
+kimi-vault draft TO SUBJECT BODY
+kimi-vault send TO SUBJECT BODY [--yes]
+```
 
-# Send email
-kimi-vault send to@example.com "Subject" "Body text"
+### Calendar (Planned)
 
-# Get OAuth tokens
-kimi-vault-oauth
+```bash
+kimi-vault calendar today    # Today's events
+kimi-vault calendar week     # This week's events
+kimi-vault calendar next     # Next meeting
 ```
 
 ## Python API
 
+### Vault Operations
+
 ```python
-from kimi_vault import GmailClient, VaultCrypto, VaultConfig
+from kimi_vault import VaultConfig, VaultCrypto
 
-# Use default config
+# Configuration (env vars + config file + defaults)
 config = VaultConfig()
-print(f"Vault dir: {config.vault_dir}")
+print(config.vault_dir)      # ~/.kimi-vault
+print(config.key_file)       # ~/.kimi-vault/key.txt
 
-# Encrypt/decrypt files
+# Encryption/decryption
 crypto = VaultCrypto()
-crypto.encrypt("secrets.json")
+crypto.encrypt("secrets.json", output_file="secrets.json.age")
 decrypted_path = crypto.decrypt("secrets.json.age")
 
-# Use Gmail client
-client = GmailClient()  # Auto-detects secrets from env
-emails = client.list_unread(max_results=5)
-for email in emails:
-    print(f"{email['subject']} from {email['from']}")
+# Secure cleanup
+from kimi_vault.crypto import secure_delete
+secure_delete(decrypted_path)
+```
 
-# Create draft
-client.create_draft(
+### Gmail Client
+
+```python
+from kimi_vault import GmailClient
+
+# Auto-detects secrets from KIMI_VAULT_SECRETS env var
+client = GmailClient()
+
+# Read operations
+emails = client.list_unread(max_results=5)
+results = client.search_emails("from:boss@example.com")
+labels = client.list_labels()
+profile = client.get_profile()
+
+# Write operations
+draft = client.create_draft(
     to="recipient@example.com",
     subject="Hello",
     body="Message body"
 )
 
-# Send email
-client.send_email(
+sent = client.send_email(
     to="recipient@example.com",
     subject="Hello",
     body="Message body"
+)
+
+# Reply to thread
+client.reply_to_thread(
+    thread_id="123abc",
+    to="recipient@example.com",
+    subject="Re: Original Subject",
+    body="Reply body"
 )
 ```
 
-## Security Considerations
+## Security
 
-- **Backup your key**: `~/.kimi-vault/key.txt` is the ONLY way to decrypt your secrets. Back it up offline (password manager, encrypted USB).
-- **Don't commit secrets**: The `.gitignore` is set up to prevent accidental commits, but always double-check.
-- **Testing mode**: Gmail OAuth refresh tokens expire after 7 days in testing mode. For personal use, just re-authorize. For production apps, you'd need to go through Google's verification process.
-- **Scope limitations**: The default Gmail scope is `readonly` + `compose`. You can read emails and create drafts/send emails, but cannot delete or modify existing emails.
+- **Encryption**: age (modern, auditable, simple)
+- **Key storage**: Private key never leaves your machine
+- **At-rest**: All secrets encrypted with your public key
+- **In-use**: Decrypted to `/tmp/` with strict permissions (0600)
+- **Cleanup**: Securely shredded via `shred` (Linux/Mac) or `rm -P` (BSD)
+- **Session isolation**: Each session gets unique temp file
+
+**⚠️ Important:** Back up your `~/.kimi-vault/key.txt` offline (password manager, encrypted USB). Lose this key = lose access to all secrets.
 
 ## Requirements
 
 - Python 3.9+
 - [age](https://age-encryption.org) encryption tool
-- Google API credentials (for Gmail features)
+- API credentials for services you want to use (Gmail, etc.)
+
+## Installation Methods
+
+### Quick Install
+```bash
+./install.sh
+```
+
+### Development Install
+```bash
+./install.sh --dev
+```
+
+### Manual Install
+```bash
+pip install -e .
+```
+
+## Troubleshooting
+
+See [docs/INSTALL.md](docs/INSTALL.md) and [docs/GMAIL_SETUP.md](docs/GMAIL_SETUP.md) for detailed troubleshooting.
+
+## Roadmap
+
+- [ ] Google Calendar integration
+- [ ] GitHub API integration
+- [ ] Generic HTTP API client (for custom endpoints)
+- [ ] Plugin system for custom integrations
+- [ ] Key rotation support
+- [ ] Multiple key support (work/personal)
+
+## Contributing
+
+Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) (TODO).
 
 ## License
 
 MIT License - See [LICENSE](LICENSE) file.
-
-## Contributing
-
-Contributions welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-## Acknowledgments
-
-- [age](https://age-encryption.org) by Filippo Valsorda for modern encryption
-- Google API Client Libraries
