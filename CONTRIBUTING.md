@@ -108,6 +108,8 @@ The project includes git hooks that automatically run tests:
 - `pre-commit`: Runs quick tests on staged Python files
 - `pre-push`: Runs full test suite before allowing pushes
 
+For detailed information about git hooks, see [Git Hooks Documentation](docs/development/GIT_HOOKS.md).
+
 These hooks help maintain code quality. You can skip them temporarily with `--no-verify` flag if needed.
 
 ## Contributing Areas

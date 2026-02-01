@@ -471,7 +471,7 @@ git commit --no-verify -m "Emergency fix"
 git push --no-verify
 ```
 
-See [GIT_HOOKS.md](GIT_HOOKS.md) for detailed documentation.
+See [Git Hooks Documentation](docs/development/GIT_HOOKS.md) for detailed documentation.
 
 ## Requirements
 

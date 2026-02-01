@@ -99,7 +99,7 @@
 - **README.md**: Comprehensive with clear "Who Is This For" table, architecture diagrams, examples
 - **INSTALL.md**: Step-by-step installation guide with troubleshooting
 - **GMAIL_SETUP.md**: Detailed OAuth setup instructions with screenshots
-- **GIT_HOOKS.md**: Documentation for automated testing hooks
+- **Git Hooks Documentation (docs/development/GIT_HOOKS.md)**: Documentation for automated testing hooks
 - **Strengths**: Excellent transparency about limitations, clear security notes, good examples
 - **Weaknesses**: Could use more API documentation and troubleshooting guides
 

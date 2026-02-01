@@ -29,6 +29,7 @@ header_pages:
   - development/ARCHITECTURE.md
   - development/TESTS.md
   - development/ADR.md
+  - development/GIT_HOOKS.md
   - security/README.md
   - api/README.md
   - project/GRADE_REPORT.md
