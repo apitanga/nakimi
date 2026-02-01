@@ -25,13 +25,14 @@ A secure vault that stores your API credentials encrypted at rest, decrypts them
 
 ## Use Cases
 
-### Use Case 1: MCP Server for AI Assistants
-**Scenario**: You want Claude Desktop to check your Gmail or calendar without hardcoding credentials.
+### Use Case 1: AI Assistant CLI Integration
+**Scenario**: You want AI assistants (Kimi, Claude CLI, etc.) to check your Gmail or calendar without hardcoding credentials.
 
 ```bash
-# AI assistant runs via MCP
-kimi-vault gmail.search "meeting tomorrow"
-kimi-vault calendar.today
+# AI assistant runs in secure session
+kimi-vault session
+$ kimi-vault gmail.search "meeting tomorrow"
+$ kimi-vault calendar.today
 ```
 
 **Threat assumptions**:
@@ -39,6 +40,8 @@ kimi-vault calendar.today
 - Attacker does NOT have root (can't dump locked memory)
 - Physical machine is secure (laptop in your possession)
 - Full Disk Encryption is enabled
+
+**Future**: MCP server mode planned for direct Claude Desktop integration.
 
 ### Use Case 2: Local CLI Automation
 **Scenario**: You have scripts that need API access but you don't want credentials in shell history or env vars.
