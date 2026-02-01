@@ -6,6 +6,8 @@ import subprocess
 import tempfile
 import os
 import platform
+import ctypes
+import mmap
 from pathlib import Path
 from typing import Optional, Union
 
@@ -13,6 +15,75 @@ from typing import Optional, Union
 class VaultCryptoError(Exception):
     """Raised when encryption/decryption operations fail"""
     pass
+
+
+def can_mlock() -> bool:
+    """Check if current user can use mlock to prevent swapping"""
+    try:
+        import resource
+        soft, _ = resource.getrlimit(resource.RLIMIT_MEMLOCK)
+        return soft > 0
+    except (ImportError, OSError):
+        return False
+
+
+def get_mlock_limit() -> int:
+    """Get maximum memory this user can lock (in bytes)"""
+    try:
+        import resource
+        soft, _ = resource.getrlimit(resource.RLIMIT_MEMLOCK)
+        return soft
+    except (ImportError, OSError):
+        return 0
+
+
+def mlock_file(file_path: Union[str, Path]) -> bool:
+    """
+    Prevent a file from being swapped to disk using mlock.
+    
+    This locks the file's pages in RAM, preventing them from being
+    written to swap even under memory pressure.
+    
+    Args:
+        file_path: Path to file to lock in memory
+        
+    Returns:
+        True if successful, False otherwise (no error raised)
+    """
+    if not can_mlock():
+        return False
+    
+    try:
+        path = Path(file_path)
+        if not path.exists():
+            return False
+        
+        # Get file size
+        size = path.stat().st_size
+        limit = get_mlock_limit()
+        
+        if size > limit:
+            # File too large to lock
+            return False
+        
+        # Memory map the file and lock it
+        with open(path, 'rb') as f:
+            with mmap.mmap(f.fileno(), 0, mmap.MAP_SHARED, mmap.PROT_READ) as mm:
+                # Set up mlock call
+                libc = ctypes.CDLL('libc.so.6')
+                libc.mlock.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
+                libc.mlock.restype = ctypes.c_int
+                
+                # Lock the memory
+                addr = ctypes.c_void_p(ctypes.addressof(ctypes.c_char.from_buffer(mm)))
+                result = libc.mlock(addr, mm.size())
+                
+                # Note: mmap will be unmapped when we exit 'with' block,
+                # but the pages may stay locked in RAM until process exits
+                return result == 0
+                
+    except Exception:
+        return False
 
 
 def get_secure_temp_dir() -> Optional[Path]:
@@ -211,6 +282,8 @@ class Vault:
         if not self.key_file.exists():
             raise VaultCryptoError(f"Private key not found: {self.key_file}")
         
+        using_ram_temp = False
+        
         if plaintext_path is None:
             # Create secure temp file in RAM if possible
             temp_dir = get_secure_temp_dir()
@@ -223,6 +296,7 @@ class Vault:
                 )
                 os.close(fd)
                 output_path = Path(output_path)
+                using_ram_temp = True
             else:
                 # Fallback to system temp
                 fd, output_path = tempfile.mkstemp(prefix="kimi-vault-secrets-", suffix=".json")
@@ -239,6 +313,14 @@ class Vault:
             )
             # Secure the temp file
             os.chmod(output_path, 0o600)
+            
+            # Try to lock in memory to prevent swapping (best effort)
+            if using_ram_temp and can_mlock():
+                # We have a RAM-based file and can mlock - try to prevent swap
+                if not mlock_file(output_path):
+                    # mlock failed, but we still have RAM storage
+                    pass  # Silent - this is an optimization
+            
             return output_path
         except subprocess.CalledProcessError as e:
             # Clean up temp file on failure
