@@ -1,6 +1,6 @@
 # 🔐 Kimi Secrets Vault
 
-Give AI assistants secure access to your APIs without exposing plaintext credentials.
+Secure, plugin-based API credential management for AI assistants.
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -9,41 +9,15 @@ Give AI assistants secure access to your APIs without exposing plaintext credent
 
 A secure vault that stores your API credentials encrypted at rest, decrypts them just-in-time for AI assistant sessions, and automatically cleans up when done.
 
-**Current integrations:**
-- ✅ Gmail (read, compose, send)
+**Key feature**: Plugin-based architecture. Each service (Gmail, Calendar, GitHub, etc.) is a separate plugin that auto-loads when you add credentials.
 
-**Future integrations:**
-- 🚧 Google Calendar
-- 🚧 GitHub API
-- 🚧 Custom APIs
+## Plugins Available
 
-## Why?
-
-When using AI assistants (Kimi, Claude, etc.), you might want them to:
-- Check your unread emails
-- Look up your calendar
-- Query your GitHub issues
-
-But you shouldn't paste credentials into chat. This vault lets assistants access APIs **securely** through encrypted storage + temporary decryption.
-
-## How It Works
-
-```
-At Rest                    In Session                    Cleanup
-─────────────────────────────────────────────────────────────────────
-secrets.json.age    →    /tmp/secrets.json    →    securely shredded
-(encrypted)              (temporary only)          (session end)
-     ↑                           ↓
-     └───────────────────────────┘
-        AI assistant uses APIs
-        via temporary credentials
-```
-
-**Security features:**
-- 🔐 [age](https://age-encryption.org) encryption - modern, simple, secure
-- ⏱️ Just-in-time decryption - secrets exposed only when needed
-- 🧹 Automatic cleanup - secrets shredded (not just deleted) on exit
-- 🔄 Token refresh - OAuth tokens refreshed before expiry
+| Plugin | Status | Description |
+|--------|--------|-------------|
+| **gmail** | ✅ Ready | Read, search, and send emails |
+| **calendar** | 🚧 Planned | Google Calendar integration |
+| **github** | 🚧 Planned | GitHub API integration |
 
 ## Quick Start
 
@@ -72,13 +46,13 @@ kimi-vault init
 
 ### 3. Add API Credentials
 
-**For Gmail** (see [docs/GMAIL_SETUP.md](docs/GMAIL_SETUP.md) for detailed instructions):
+**For Gmail:**
 
 ```bash
 # 1. Copy template
 cp config/secrets.template.json ~/.kimi-vault/secrets.json
 
-# 2. Edit with your credentials
+# 2. Edit with your Gmail OAuth credentials
 vim ~/.kimi-vault/secrets.json
 
 # 3. Encrypt
@@ -90,83 +64,122 @@ age -r $(cat ~/.kimi-vault/key.txt.pub) \
 shred -u ~/.kimi-vault/secrets.json
 ```
 
-### 4. Use with AI Assistant
+See [docs/GMAIL_SETUP.md](docs/GMAIL_SETUP.md) for detailed Gmail OAuth instructions.
+
+### 4. Use It
 
 ```bash
+# Plugin commands work immediately
+kimi-vault gmail.unread              # List unread emails
+kimi-vault gmail.search "from:boss"  # Search emails
+kimi-vault gmail.profile             # Show account info
+
 # Start a secure session
-kimi-vault-session
-
-# Inside the session:
-$ kimi-vault unread           # List unread emails
-$ kimi-vault search "from:boss" # Search emails
-```
-
-Or use Python directly:
-
-```python
-from kimi_vault import GmailClient
-
-client = GmailClient()
-emails = client.list_unread()
-for email in emails:
-    print(f"{email['subject']} from {email['from']}")
+kimi-vault session
+# Inside session, same commands work:
+# $ kimi-vault gmail.unread
 ```
 
 ## Architecture
 
-The vault is designed to be **extensible**. Each API integration follows this pattern:
-
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    Vault Core                           │
-│  ┌─────────────┐  ┌──────────────┐  ┌────────────────┐ │
-│  │   Config    │  │    Crypto    │  │  Session Mgmt  │ │
-│  │  (paths,    │  │  (age enc/   │  │  (env vars,    │ │
-│  │   env vars) │  │   dec)       │  │   cleanup)     │ │
-│  └──────┬──────┘  └──────┬───────┘  └───────┬────────┘ │
-└─────────┼────────────────┼──────────────────┼──────────┘
-          │                │                  │
-          └────────────────┴──────────────────┘
-                           │
-          ┌────────────────┼────────────────┐
-          ▼                ▼                ▼
-    ┌──────────┐    ┌──────────┐    ┌──────────┐
-    │  Gmail   │    │ Calendar │    │  GitHub  │
-    │  Client  │    │  (todo)  │    │  (todo)  │
-    └──────────┘    └──────────┘    └──────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                         CLI Layer                                │
+│  kimi-vault <plugin>.<command> [args]                           │
+│  Example: kimi-vault gmail.unread --limit=5                     │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     Plugin Manager                               │
+│  • Auto-discovers plugins with credentials                       │
+│  • Routes commands to correct plugin                             │
+│  • Loads secrets on demand                                       │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+          ┌───────────────────┼───────────────────┐
+          ▼                   ▼                   ▼
+   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
+   │ gmail plugin │   │calendar plugin│  │ github plugin│
+   │              │   │   (planned)   │   │  (planned)   │
+   │ • unread     │   │ • today       │   │ • issues     │
+   │ • search     │   │ • week        │   │ • prs        │
+   │ • send       │   │ • add         │   │ • repos      │
+   └──────────────┘   └──────────────┘   └──────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        Vault Core                                │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐  │
+│  │   Config     │  │    Vault     │  │ Session Management   │  │
+│  │  (paths,     │  │  (age enc/   │  │ (env vars, cleanup)  │  │
+│  │   env vars)  │  │   dec)       │  │                      │  │
+│  └──────────────┘  └──────────────┘  └──────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### Adding a New API Integration
+## How It Works
 
-To add a new service (e.g., Google Calendar):
+**At Rest:**
+- Credentials encrypted with [age](https://age-encryption.org)
+- Private key stored in `~/.kimi-vault/key.txt`
 
-1. **Add credentials to secrets template:**
-   ```json
-   {
-     "calendar": {
-       "client_id": "...",
-       "client_secret": "...",
-       "refresh_token": "..."
-     }
-   }
-   ```
+**In Session:**
+- Vault decrypts to temp file on demand
+- Plugins load credentials from temp file
+- Temp file shredded on exit
 
-2. **Create a client class:**
-   ```python
-   # src/kimi_vault/calendar_client.py
-   from .client import BaseOAuthClient
-   
-   class CalendarClient(BaseOAuthClient):
-       SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
-       # ... implement methods
-   ```
+**Plugin Discovery:**
+- Plugins auto-load if credentials exist in `secrets.json`
+- No credentials = plugin not loaded
+- Add credentials → plugin appears
 
-3. **Add CLI commands:**
-   ```python
-   # In cli.py
-   elif args.command == "calendar":
-       events = calendar_client.list_events()
-   ```
+## CLI Reference
+
+### Vault Management
+
+```bash
+kimi-vault init                              # Generate encryption keys
+kimi-vault encrypt <file> [-o output]        # Encrypt a file
+kimi-vault decrypt <file.age> [-o output]    # Decrypt a file
+kimi-vault session                           # Start secure session
+```
+
+### Plugin Commands
+
+#### Gmail Plugin
+
+```bash
+kimi-vault gmail.unread [limit]              # List unread emails
+kimi-vault gmail.search <query> [limit]      # Search emails
+kimi-vault gmail.labels                      # List labels
+kimi-vault gmail.profile                     # Show account info
+kimi-vault gmail.draft <to> <subject> <body> # Create draft
+kimi-vault gmail.send <to> <subject> <body>  # Send email
+```
+
+**Examples:**
+
+```bash
+# List 5 unread emails
+kimi-vault gmail.unread 5
+
+# Search for emails from boss
+kimi-vault gmail.search "from:boss@company.com"
+
+# Search with date range
+kimi-vault gmail.search "after:2026/01/01 before:2026/01/31"
+
+# Send quick email
+kimi-vault gmail.send "colleague@example.com" "Quick question" "Hey, can we chat?"
+```
+
+### Plugin Management
+
+```bash
+kimi-vault plugins list                      # List loaded plugins
+kimi-vault plugins commands                  # List all available commands
+```
 
 ## Configuration
 
@@ -177,165 +190,163 @@ To add a new service (e.g., Google Calendar):
 | `KIMI_VAULT_DIR` | Vault directory | `~/.kimi-vault` |
 | `KIMI_VAULT_KEY` | Private key path | `~/.kimi-vault/key.txt` |
 | `KIMI_VAULT_SECRETS` | Encrypted secrets path | `~/.kimi-vault/secrets.json.age` |
-| `KIMI_VAULT_CLIENT_ID` | OAuth client ID | (from config) |
-| `KIMI_VAULT_CLIENT_SECRET` | OAuth client secret | (from config) |
 
 ### Config File
 
 Create `~/.config/kimi-vault/config`:
 
 ```bash
-# Paths
 vault_dir = ~/.kimi-vault
 key_file = ~/.kimi-vault/key.txt
-
-# OAuth credentials (optional)
-client_id = your-client-id.apps.googleusercontent.com
-client_secret = your-client-secret
 ```
 
-## CLI Reference
+## Creating a Plugin
 
-### Vault Management
+Want to add a new service? Here's the pattern:
+
+### 1. Create Plugin Directory
 
 ```bash
-kimi-vault init              # Initialize vault, generate keys
-kimi-vault-session           # Start secure session
-kimi-vault-oauth             # Get OAuth refresh tokens
+mkdir src/kimi_vault/plugins/myservice
+touch src/kimi_vault/plugins/myservice/__init__.py
 ```
 
-### Gmail (Current Integration)
+### 2. Implement Plugin Class
 
-```bash
-kimi-vault unread [OPTIONS]
-  -n, --limit INTEGER  Maximum emails to show [default: 10]
+```python
+# src/kimi_vault/plugins/myservice/plugin.py
+from kimi_vault.core.plugin import Plugin, PluginCommand, PluginError
 
-kimi-vault search QUERY [OPTIONS]
-  -n, --limit INTEGER  Maximum emails to show [default: 10]
-
-kimi-vault labels            # List Gmail labels
-kimi-vault profile           # Show Gmail profile
-
-kimi-vault draft TO SUBJECT BODY
-kimi-vault send TO SUBJECT BODY [--yes]
+class MyServicePlugin(Plugin):
+    @property
+    def name(self) -> str:
+        return "myservice"
+    
+    @property
+    def description(self) -> str:
+        return "MyService integration"
+    
+    def _validate_secrets(self):
+        required = ['api_key']
+        missing = [f for f in required if not self.secrets.get(f)]
+        if missing:
+            raise PluginError(f"Missing: {missing}")
+    
+    def get_commands(self) -> list[PluginCommand]:
+        return [
+            PluginCommand(
+                name="list",
+                description="List things",
+                handler=self.cmd_list,
+                args=[]
+            ),
+        ]
+    
+    def cmd_list(self) -> str:
+        # Implement your logic
+        return "Results here"
 ```
 
-### Calendar (Planned)
+### 3. Add Credentials Template
+
+Update `config/secrets.template.json`:
+
+```json
+{
+  "myservice": {
+    "api_key": "your-api-key"
+  }
+}
+```
+
+### 4. Use It
 
 ```bash
-kimi-vault calendar today    # Today's events
-kimi-vault calendar week     # This week's events
-kimi-vault calendar next     # Next meeting
+kimi-vault myservice.list
 ```
 
 ## Python API
 
-### Vault Operations
+### Using Plugins Directly
 
 ```python
-from kimi_vault import VaultConfig, VaultCrypto
+from kimi_vault.core import Vault, get_config
+from kimi_vault.plugins.gmail import GmailClient
 
-# Configuration (env vars + config file + defaults)
-config = VaultConfig()
-print(config.vault_dir)      # ~/.kimi-vault
-print(config.key_file)       # ~/.kimi-vault/key.txt
+# Load secrets
+config = get_config()
+vault = Vault()
+secrets_path = vault.decrypt(config.secrets_file)
 
-# Encryption/decryption
-crypto = VaultCrypto()
-crypto.encrypt("secrets.json", output_file="secrets.json.age")
-decrypted_path = crypto.decrypt("secrets.json.age")
+import json
+with open(secrets_path) as f:
+    secrets = json.load(f)
 
-# Secure cleanup
-from kimi_vault.crypto import secure_delete
-secure_delete(decrypted_path)
+# Use plugin
+client = GmailClient(secrets['gmail'])
+for email in client.list_unread():
+    print(f"{email['subject']} from {email['from']}")
+
+# Clean up
+from kimi_vault.core import secure_delete
+secure_delete(secrets_path)
 ```
 
-### Gmail Client
+### Creating Custom Plugins
 
 ```python
-from kimi_vault import GmailClient
+from kimi_vault.core.plugin import Plugin, PluginCommand
 
-# Auto-detects secrets from KIMI_VAULT_SECRETS env var
-client = GmailClient()
-
-# Read operations
-emails = client.list_unread(max_results=5)
-results = client.search_emails("from:boss@example.com")
-labels = client.list_labels()
-profile = client.get_profile()
-
-# Write operations
-draft = client.create_draft(
-    to="recipient@example.com",
-    subject="Hello",
-    body="Message body"
-)
-
-sent = client.send_email(
-    to="recipient@example.com",
-    subject="Hello",
-    body="Message body"
-)
-
-# Reply to thread
-client.reply_to_thread(
-    thread_id="123abc",
-    to="recipient@example.com",
-    subject="Re: Original Subject",
-    body="Reply body"
-)
+class CustomPlugin(Plugin):
+    @property
+    def name(self):
+        return "custom"
+    
+    def get_commands(self):
+        return [PluginCommand("hello", "Say hello", self.hello, [])]
+    
+    def hello(self):
+        return f"Hello, {self.secrets.get('name', 'world')}"
 ```
 
 ## Security
 
-- **Encryption**: age (modern, auditable, simple)
+- **Encryption**: [age](https://age-encryption.org) - modern, auditable, simple
 - **Key storage**: Private key never leaves your machine
-- **At-rest**: All secrets encrypted with your public key
-- **In-use**: Decrypted to `/tmp/` with strict permissions (0600)
-- **Cleanup**: Securely shredded via `shred` (Linux/Mac) or `rm -P` (BSD)
+- **At-rest**: All secrets encrypted
+- **In-use**: Decrypted to temp files with strict permissions (0600)
+- **Cleanup**: Securely shredded via `shred` (not just deleted)
 - **Session isolation**: Each session gets unique temp file
 
-**⚠️ Important:** Back up your `~/.kimi-vault/key.txt` offline (password manager, encrypted USB). Lose this key = lose access to all secrets.
+**⚠️ Important:** Back up your `~/.kimi-vault/key.txt` offline. Lose this key = lose access to all secrets.
 
 ## Requirements
 
 - Python 3.9+
 - [age](https://age-encryption.org) encryption tool
-- API credentials for services you want to use (Gmail, etc.)
+- API credentials for services you want to use
 
-## Installation Methods
+## Installation
 
-### Quick Install
 ```bash
-./install.sh
+./install.sh           # User install
+./install.sh --dev     # Development install with test deps
 ```
 
-### Development Install
-```bash
-./install.sh --dev
-```
-
-### Manual Install
-```bash
-pip install -e .
-```
-
-## Troubleshooting
-
-See [docs/INSTALL.md](docs/INSTALL.md) and [docs/GMAIL_SETUP.md](docs/GMAIL_SETUP.md) for detailed troubleshooting.
+See [docs/INSTALL.md](docs/INSTALL.md) for detailed instructions.
 
 ## Roadmap
 
-- [ ] Google Calendar integration
-- [ ] GitHub API integration
-- [ ] Generic HTTP API client (for custom endpoints)
-- [ ] Plugin system for custom integrations
-- [ ] Key rotation support
-- [ ] Multiple key support (work/personal)
+- [x] Plugin architecture
+- [x] Gmail plugin
+- [ ] Google Calendar plugin
+- [ ] GitHub plugin
+- [ ] Custom HTTP API plugin
+- [ ] MCP server mode
 
 ## Contributing
 
-Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) (TODO).
+Contributions welcome! The plugin architecture makes it easy to add new services.
 
 ## License
 
