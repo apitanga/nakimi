@@ -11,6 +11,64 @@ A secure vault that stores your API credentials encrypted at rest, decrypts them
 
 **Key feature**: Plugin-based architecture. Each service (Gmail, Calendar, GitHub, etc.) is a separate plugin that auto-loads when you add credentials.
 
+## Who Is This For?
+
+| ✅ This Tool Is For | ❌ This Tool Is NOT For |
+|---------------------|-------------------------|
+| **Individual developers** who want AI assistants to access their personal APIs | **Enterprise teams** needing audit logs, RBAC, and shared secrets |
+| **Local-only usage** on your personal machine | **Multi-user/shared vaults** where secrets need to be distributed |
+| **Convenience + reasonable security** - you accept "good enough" protection | **Maximum security environments** requiring HSMs, air-gapping, or zero-knowledge |
+| **Personal projects** where you control the entire stack | **Production systems** with compliance requirements (SOC2, PCI-DSS, etc.) |
+| **AI assistant integrations** (Claude, ChatGPT, local LLMs) | **Server deployments** or CI/CD pipelines |
+
+**Bottom line**: This is a **personal developer tool**, not an enterprise secrets manager. If you need HashiCorp Vault, AWS Secrets Manager, or 1Password for Teams, use those instead.
+
+## Use Cases
+
+### Use Case 1: MCP Server for AI Assistants
+**Scenario**: You want Claude Desktop to check your Gmail or calendar without hardcoding credentials.
+
+```bash
+# AI assistant runs via MCP
+kimi-vault gmail.search "meeting tomorrow"
+kimi-vault calendar.today
+```
+
+**Threat assumptions**:
+- Attacker has access to your user account (can read ~/.kimi-vault/)
+- Attacker does NOT have root (can't dump locked memory)
+- Physical machine is secure (laptop in your possession)
+- Full Disk Encryption is enabled
+
+### Use Case 2: Local CLI Automation
+**Scenario**: You have scripts that need API access but you don't want credentials in shell history or env vars.
+
+```bash
+# In your script
+kimi-vault session --exec ./deploy.sh
+# deploy.sh can use gmail.send, github.issues, etc.
+```
+
+**Threat assumptions**:
+- Machine is single-user
+- No malware/keyloggers present
+- Scripts run interactively (not in shared CI/CD)
+- Temporary files in RAM are acceptable risk
+
+### Use Case 3: AI Coding Assistants
+**Scenario**: You're using Cursor, Copilot, or Kimi CLI and want them to interact with your GitHub repos or cloud services.
+
+```bash
+# Ask AI: "Show me my unread GitHub notifications"
+# AI runs: kimi-vault github.notifications
+```
+
+**Threat assumptions**:
+- You trust the AI assistant tool itself
+- API access is read-only or low-risk
+- Compromised AI tool = compromised credentials
+- Acceptable for personal projects, NOT for production infra
+
 ## Plugins Available
 
 | Plugin | Status | Description |
