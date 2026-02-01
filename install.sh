@@ -103,7 +103,7 @@ else
 fi
 
 # Create symlinks or wrapper scripts
-for script in kimi-vault-session kimi-vault-oauth; do
+for script in kimi-vault kimi-vault-session; do
     if [ -f "$SCRIPT_DIR/bin/$script" ]; then
         # Make script executable
         chmod +x "$SCRIPT_DIR/bin/$script"
