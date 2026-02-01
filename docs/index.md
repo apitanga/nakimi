@@ -16,8 +16,8 @@ Kimi Secrets Vault is a secure, plugin-based API credential management system fo
 - **[Architecture](./development/ARCHITECTURE.md)** - System design and security model
 - **[Testing Guide](./development/TESTS.md)** - Comprehensive testing documentation
 - **[ADR](./development/ADR.md)** - Architecture Decision Records
-- **[Security](./security/README.md)** - Security architecture and policies
-- **[API Reference](./api/README.md)** - Python API and plugin development
+- **[Security](./security/index.md)** - Security architecture and policies
+- **[API Reference](./api/index.md)** - Python API and plugin development
 
 ## Core Features
 

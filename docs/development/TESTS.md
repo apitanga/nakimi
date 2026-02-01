@@ -473,4 +473,4 @@ When adding features, follow this checklist:
 **See Also**:
 - [Plugin Development](./PLUGIN_DEVELOPMENT.md) - Creating plugins with tests
 - [Architecture](./ARCHITECTURE.md) - System design and security model
-- [README](./README.md) - Project overview
+- [Project Overview](../index.md) - Homepage with project overview

@@ -19,6 +19,7 @@ plugins:
 # Just the Docs theme configuration
 just_the_docs:
   # Navigation configuration
+  nav_folders: true
   nav:
     - title: Home
       url: /
