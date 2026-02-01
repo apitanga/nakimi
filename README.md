@@ -377,10 +377,16 @@ class CustomPlugin(Plugin):
 
 **⚠️ Security Note on SSDs:** 
 
-This tool now uses **RAM-backed storage** (`/dev/shm` on Linux) for temporary decrypted files whenever available. This means:
-- ✅ Secrets never touch physical disk during sessions (on Linux)
-- ✅ `shred` is effective (data is truly gone on RAM reset)
-- ✅ Automatic cleanup on system reboot
+This tool uses multiple layers of protection for temporary decrypted files:
+
+1. **RAM-backed storage** (`/dev/shm` on Linux) - Secrets never touch physical disk
+2. **Memory locking** (`mlock`) - Prevents RAM from being swapped to disk under memory pressure
+3. **Strict permissions** (`chmod 600`) - Only owner can read
+
+This means:
+- ✅ Secrets stay in RAM only (never on SSD/HDD)
+- ✅ Protected from swapping (even under memory pressure)
+- ✅ Automatic cleanup on reboot
 
 For systems without RAM disk support or maximum security, we still recommend **Full Disk Encryption** (FileVault on macOS, BitLocker on Windows, or LUKS on Linux).
 
