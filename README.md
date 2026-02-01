@@ -40,8 +40,26 @@ sudo dnf install age
 
 ### 2. Install kimi-secrets-vault
 
+**Option A: One-line install (Recommended)**
+
 ```bash
-git clone https://github.com/YOUR_USERNAME/kimi-secrets-vault.git
+curl -sSL https://raw.githubusercontent.com/apitanga/kimi-secrets-vault/main/install.sh | bash
+```
+
+**Option B: Install from GitHub with pip**
+
+```bash
+# Latest version
+pip install git+https://github.com/apitanga/kimi-secrets-vault.git
+
+# Specific version
+pip install git+https://github.com/apitanga/kimi-secrets-vault.git@v1.0.0
+```
+
+**Option C: Clone and install locally**
+
+```bash
+git clone https://github.com/apitanga/kimi-secrets-vault.git
 cd kimi-secrets-vault
 ./install.sh
 ```
@@ -160,6 +178,23 @@ kimi-vault init                              # Generate encryption keys
 kimi-vault encrypt <file> [-o output]        # Encrypt a file
 kimi-vault decrypt <file.age> [-o output]    # Decrypt a file
 kimi-vault session                           # Start secure session
+kimi-vault --version                         # Show version info
+```
+
+### Upgrading
+
+```bash
+# Check current version
+kimi-vault --version
+
+# Upgrade to latest version from GitHub
+kimi-vault upgrade
+
+# Upgrade to specific version
+kimi-vault upgrade --version 1.1.0
+
+# Or use pip directly
+pip install --upgrade git+https://github.com/apitanga/kimi-secrets-vault.git
 ```
 
 ### Plugin Commands
@@ -364,11 +399,37 @@ See [GIT_HOOKS.md](GIT_HOOKS.md) for detailed documentation.
 - [age](https://age-encryption.org) encryption tool
 - API credentials for services you want to use
 
-## Installation
+## Installation & Upgrading
+
+### Fresh Install
 
 ```bash
-./install.sh           # User install
-./install.sh --dev     # Development install with test deps
+# One-line installer (recommended)
+curl -sSL https://raw.githubusercontent.com/apitanga/kimi-secrets-vault/main/install.sh | bash
+
+# Or with pip
+pip install git+https://github.com/apitanga/kimi-secrets-vault.git
+```
+
+### Upgrading
+
+```bash
+# Built-in upgrade command
+kimi-vault upgrade
+
+# Upgrade to specific version
+kimi-vault upgrade --version 1.1.0
+
+# Or reinstall with pip
+pip install --upgrade git+https://github.com/apitanga/kimi-secrets-vault.git
+```
+
+### Development Install
+
+```bash
+git clone https://github.com/apitanga/kimi-secrets-vault.git
+cd kimi-secrets-vault
+./install.sh --dev
 ```
 
 See [docs/INSTALL.md](docs/INSTALL.md) for detailed instructions.
