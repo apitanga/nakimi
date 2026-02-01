@@ -1,6 +1,7 @@
 ---
 title: Comprehensive Grade Report
-nav_order: 100
+nav_order: 101
+parent: Project
 ---
 
 # Comprehensive Grade Report

@@ -1,6 +1,7 @@
 ---
 title: Architecture
-nav_order: 40
+nav_order: 32
+parent: Development
 ---
 
 # Architecture

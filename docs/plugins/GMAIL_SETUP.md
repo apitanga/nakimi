@@ -1,6 +1,7 @@
 ---
 title: Gmail Plugin Setup Guide
-nav_order: 20
+nav_order: 21
+parent: Plugins
 ---
 
 # Gmail Plugin Setup Guide

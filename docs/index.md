@@ -12,14 +12,12 @@ Kimi Secrets Vault is a secure, plugin-based API credential management system fo
 
 ## Quick Links
 
-- **[Getting Started](./getting-started/INSTALL.md)** - Installation and setup
-- **[Gmail Plugin Setup](./plugins/GMAIL_SETUP.md)** - Configure Gmail integration
-- **[Plugin Development](./development/PLUGIN_DEVELOPMENT.md)** - Create your own plugins
-- **[Architecture](./development/ARCHITECTURE.md)** - System design and security model
-- **[Testing Guide](./development/TESTS.md)** - Comprehensive testing documentation
-- **[ADR](./development/ADR.md)** - Architecture Decision Records
-- **[Security](./security/index.md)** - Security architecture and policies
-- **[API Reference](./api/index.md)** - Python API and plugin development
+- **[Getting Started](./getting-started/)** - Installation and setup guides
+- **[Plugins](./plugins/)** - Plugin setup and configuration
+- **[Development](./development/)** - Plugin development and architecture
+- **[Security](./security/)** - Security architecture and policies
+- **[API Reference](./api/)** - Python API and plugin development
+- **[Project](./project/)** - Project reports and roadmap
 
 ## Core Features
 

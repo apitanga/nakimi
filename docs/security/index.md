@@ -1,6 +1,7 @@
 ---
 title: Security Documentation
 nav_order: 80
+has_children: true
 ---
 
 # Security Documentation

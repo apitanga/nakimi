@@ -1,6 +1,7 @@
 ---
 title: Testing Guide
-nav_order: 50
+nav_order: 33
+parent: Development
 ---
 
 # Testing Guide

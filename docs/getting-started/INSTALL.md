@@ -1,6 +1,7 @@
 ---
 title: Installation Guide
-nav_order: 10
+nav_order: 11
+parent: Getting Started
 ---
 
 # Installation Guide

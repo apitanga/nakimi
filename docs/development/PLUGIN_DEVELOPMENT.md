@@ -1,6 +1,7 @@
 ---
 title: Plugin Development Guide
-nav_order: 30
+nav_order: 31
+parent: Development
 ---
 
 # Plugin Development Guide

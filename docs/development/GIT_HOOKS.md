@@ -1,6 +1,7 @@
 ---
 title: Git Hooks for Test Protection
-nav_order: 70
+nav_order: 35
+parent: Development
 ---
 
 # Git Hooks for Test Protection

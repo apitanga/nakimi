@@ -1,6 +1,7 @@
 ---
 title: Security Policy
 nav_order: 81
+parent: Security Documentation
 ---
 
 # Security Policy

@@ -1,6 +1,7 @@
 ---
 title: Architecture Decision Records
-nav_order: 60
+nav_order: 34
+parent: Development
 ---
 
 # Architecture Decision Records

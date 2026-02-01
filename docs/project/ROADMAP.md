@@ -1,6 +1,7 @@
 ---
 title: Development Roadmap 2026
-nav_order: 110
+nav_order: 102
+parent: Project
 ---
 
 # Development Roadmap 2026
