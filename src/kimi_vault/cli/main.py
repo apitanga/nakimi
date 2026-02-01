@@ -10,11 +10,8 @@ import os
 import sys
 from pathlib import Path
 
-# Add parent to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from core import Vault, VaultConfig, get_config, secure_delete
-from core.plugin import PluginManager, PluginError
+from kimi_vault.core import Vault, VaultConfig, get_config, secure_delete
+from kimi_vault.core.plugin import PluginManager, PluginError
 
 
 def get_secrets_path() -> Path:
@@ -38,8 +35,20 @@ def load_secrets() -> dict:
             "Run 'kimi-vault init' to set up your vault."
         )
     
-    with open(secrets_path, 'r') as f:
-        return json.load(f)
+    # Check if file is encrypted (.age extension)
+    if str(secrets_path).endswith('.age'):
+        # Need to decrypt first
+        vault = Vault()
+        temp_path = vault.decrypt(secrets_path)
+        try:
+            with open(temp_path, 'r') as f:
+                return json.load(f)
+        finally:
+            secure_delete(temp_path)
+    else:
+        # Plaintext JSON
+        with open(secrets_path, 'r') as f:
+            return json.load(f)
 
 
 def cmd_init(args):

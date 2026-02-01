@@ -67,14 +67,22 @@ class Vault:
                 text=True,
                 check=True
             )
-            # Extract public key from output
+            # Extract public key from stderr output
             public_key = None
             for line in result.stderr.split('\n'):
-                if line.startswith('# public key:'):
-                    public_key = line.split(':')[1].strip()
+                if 'public key:' in line:
+                    public_key = line.split('public key:')[1].strip()
                     break
             
-            # Also create .pub file
+            # Also read from key file if not in stderr
+            if not public_key:
+                with open(self.key_file, 'r') as f:
+                    for line in f:
+                        if line.startswith('# public key:'):
+                            public_key = line.split(':')[1].strip()
+                            break
+            
+            # Create .pub file
             if public_key:
                 with open(self.key_pub_file, 'w') as f:
                     f.write(public_key + '\n')

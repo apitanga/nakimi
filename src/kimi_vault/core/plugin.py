@@ -38,15 +38,16 @@ class Plugin(abc.ABC):
     
     Example:
         class GmailPlugin(Plugin):
-            @property
-            def name(self) -> str:
-                return "gmail"
+            PLUGIN_NAME = "gmail"
             
             def get_commands(self) -> List[PluginCommand]:
                 return [
                     PluginCommand("unread", "List unread emails", self.list_unread, [])
                 ]
     """
+    
+    # Override this in subclass with the plugin name
+    PLUGIN_NAME: str = ""
     
     def __init__(self, secrets: Dict[str, Any]):
         """
@@ -61,15 +62,14 @@ class Plugin(abc.ABC):
     
     @property
     @abc.abstractmethod
-    def name(self) -> str:
-        """Return the plugin name (e.g., 'gmail', 'calendar')"""
-        pass
-    
-    @property
-    @abc.abstractmethod
     def description(self) -> str:
         """Return a short description of the plugin"""
         pass
+    
+    @property
+    def name(self) -> str:
+        """Return the plugin name"""
+        return self.PLUGIN_NAME
     
     @abc.abstractmethod
     def _validate_secrets(self):
@@ -124,7 +124,10 @@ class PluginManager:
             plugin_class: The Plugin subclass to register
             plugin_secrets: Optional override for plugin secrets
         """
-        plugin_name = plugin_class({}).name  # Get name without instantiating
+        # Get plugin name from class attribute (don't instantiate yet)
+        plugin_name = getattr(plugin_class, 'PLUGIN_NAME', None)
+        if not plugin_name:
+            return
         
         # Get secrets for this plugin
         if plugin_secrets is not None:
@@ -164,6 +167,11 @@ class PluginManager:
         # Find all plugin subdirectories
         for item in plugins_dir.iterdir():
             if item.is_dir() and not item.name.startswith('_'):
+                plugin_file = item / "plugin.py"
+                if not plugin_file.exists():
+                    # Skip directories without plugin.py (placeholder plugins)
+                    continue
+                
                 try:
                     # Import the plugin module
                     module = import_module(f"kimi_vault.plugins.{item.name}.plugin")

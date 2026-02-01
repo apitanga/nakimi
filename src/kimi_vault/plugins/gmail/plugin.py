@@ -14,13 +14,15 @@ from .client import GmailClient, GmailAuthError
 class GmailPlugin(Plugin):
     """Plugin providing Gmail integration"""
     
+    PLUGIN_NAME = "gmail"
+    
     def __init__(self, secrets: Dict[str, Any]):
         self.client: GmailClient = None
         super().__init__(secrets)
     
     @property
     def name(self) -> str:
-        return "gmail"
+        return self.PLUGIN_NAME
     
     @property
     def description(self) -> str:
