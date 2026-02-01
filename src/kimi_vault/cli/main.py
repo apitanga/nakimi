@@ -244,6 +244,21 @@ def cmd_session(args):
 
 
 def main():
+    # Check for plugin command BEFORE setting up argparse
+    # This allows plugin commands like "gmail.unread" to work
+    if len(sys.argv) > 1 and "." in sys.argv[1] and not sys.argv[1].startswith("-"):
+        plugin_cmd = sys.argv[1]
+        if "." in plugin_cmd:
+            parts = plugin_cmd.split(".", 1)
+            # Create minimal args object for cmd_run
+            class Args:
+                pass
+            args = Args()
+            args.plugin = parts[0]
+            args.command = parts[1]
+            args.args = sys.argv[2:]
+            return cmd_run(args)
+    
     parser = argparse.ArgumentParser(
         prog="kimi-vault",
         description="Secure vault for API credentials with plugin-based integrations",
@@ -292,17 +307,6 @@ Examples:
     args, remaining = parser.parse_known_args()
     
     if not args.cmd:
-        # Check if first arg looks like plugin.command
-        if len(sys.argv) > 1 and "." in sys.argv[1] and not sys.argv[1].startswith("-"):
-            # Parse as plugin.command
-            plugin_cmd = sys.argv[1]
-            if "." in plugin_cmd:
-                parts = plugin_cmd.split(".", 1)
-                args.plugin = parts[0]
-                args.command = parts[1]
-                args.args = sys.argv[2:]
-                return cmd_run(args)
-        
         parser.print_help()
         sys.exit(1)
     
