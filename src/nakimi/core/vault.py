@@ -140,6 +140,15 @@ class Vault:
             key_file: Path to age private key (default: ~/.nakimi/key.txt)
             vault_dir: Directory for vault files (default: ~/.nakimi)
         """
+        # Use config if not provided
+        if key_file is None or vault_dir is None:
+            from .config import get_config
+            config = get_config()
+            if vault_dir is None:
+                vault_dir = config.vault_dir
+            if key_file is None:
+                key_file = config.key_file
+        
         self.vault_dir = Path(vault_dir).expanduser() if vault_dir else Path.home() / ".nakimi"
         self.key_file = Path(key_file).expanduser() if key_file else self.vault_dir / "key.txt"
         self.key_pub_file = Path(str(self.key_file) + ".pub")

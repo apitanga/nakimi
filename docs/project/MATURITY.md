@@ -1,10 +1,10 @@
 ---
-title: Comprehensive Grade Report
+title: Project maturity report
 nav_order: 101
 parent: Project
 ---
 
-# Comprehensive Grade Report
+# Project maturity report
 
 ## Project Overview
 **Project**: nakimi  

@@ -29,20 +29,26 @@ class VaultConfig:
     
     def _load_config(self):
         """Load configuration from env vars and/or config file"""
-        # Environment variables take precedence
-        self._vault_dir = self._get_path_from_env("NAKIMI_DIR", self.DEFAULT_VAULT_DIR)
-        self._config_dir = self._get_path_from_env("NAKIMI_CONFIG_DIR", self.DEFAULT_CONFIG_DIR)
-        
+        # Load config file first to get any config values
         config_file_env = os.environ.get("NAKIMI_CONFIG")
         if config_file_env:
             self._config_file = Path(config_file_env).expanduser()
         else:
-            self._config_file = self._config_dir / self.DEFAULT_CONFIG_FILE
+            # Need a temporary config_dir to find config file
+            temp_config_dir = self._get_path_from_env("NAKIMI_CONFIG_DIR", self.DEFAULT_CONFIG_DIR)
+            self._config_file = temp_config_dir / self.DEFAULT_CONFIG_FILE
         
         # Load from config file if it exists
         config_values = self._read_config_file()
         
         # Set paths (env var > config file > default)
+        self._vault_dir = self._get_path(
+            "NAKIMI_DIR",
+            config_values.get("vault_dir"),
+            Path(self.DEFAULT_VAULT_DIR).expanduser()
+        )
+        self._config_dir = self._get_path_from_env("NAKIMI_CONFIG_DIR", self.DEFAULT_CONFIG_DIR)
+        
         self._key_file = self._get_path(
             "NAKIMI_KEY",
             config_values.get("key_file"),
