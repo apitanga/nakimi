@@ -1,4 +1,4 @@
-"""CLI for Kimi Vault"""
+"""CLI for Nakimi"""
 
 from .main import main
 

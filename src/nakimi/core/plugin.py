@@ -1,5 +1,5 @@
 """
-Plugin system for Kimi Vault.
+Plugin system for Nakimi.
 
 Plugins provide integration with specific services (Gmail, Calendar, etc.).
 Each plugin is self-contained with its own client and CLI commands.
@@ -29,7 +29,7 @@ class PluginCommand:
 
 class Plugin(abc.ABC):
     """
-    Base class for Kimi Vault plugins.
+    Base class for Nakimi plugins.
     
     Each plugin provides:
     - A service name (e.g., "gmail", "calendar")
@@ -161,7 +161,7 @@ class PluginManager:
         from importlib import import_module
         
         # Get the plugins directory
-        import kimi_vault.plugins as plugins_pkg
+        import nakimi.plugins as plugins_pkg
         plugins_dir = Path(plugins_pkg.__file__).parent
         
         # Find all plugin subdirectories
@@ -174,7 +174,7 @@ class PluginManager:
                 
                 try:
                     # Import the plugin module
-                    module = import_module(f"kimi_vault.plugins.{item.name}.plugin")
+                    module = import_module(f"nakimi.plugins.{item.name}.plugin")
                     
                     # Find the Plugin subclass
                     for attr_name in dir(module):

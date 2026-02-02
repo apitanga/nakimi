@@ -1,5 +1,5 @@
 """
-Kimi Vault Core - Encryption, configuration, and plugin management
+Nakimi Core - Encryption, configuration, and plugin management
 """
 
 from .vault import Vault, VaultCryptoError, secure_delete

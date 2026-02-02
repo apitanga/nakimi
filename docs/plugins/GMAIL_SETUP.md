@@ -6,7 +6,7 @@ parent: Plugins
 
 # Gmail Plugin Setup Guide
 
-This guide walks you through setting up the Gmail plugin for kimi-secrets-vault.
+This guide walks you through setting up the Gmail plugin for nakimi.
 
 ## Overview
 
@@ -22,7 +22,7 @@ This guide walks you through setting up the Gmail plugin for kimi-secrets-vault.
 
 ## Architecture
 
-The Gmail plugin is a standard kimi-vault plugin that:
+The Gmail plugin is a standard nakimi plugin that:
 - Loads credentials from the vault's encrypted secrets
 - Uses Google's official API libraries
 - Auto-refreshes OAuth tokens before expiry
@@ -31,7 +31,7 @@ The Gmail plugin is a standard kimi-vault plugin that:
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
 │  User CLI   │────▶│ GmailPlugin │────▶│ GmailClient │
-│kimi-vault   │     │             │     │             │
+│nakimi   │     │             │     │             │
 │gmail.unread │     │ • validate  │     │ • OAuth     │
 │gmail.send   │     │ • commands  │     │ • API calls │
 └─────────────┘     └──────┬──────┘     └─────────────┘
@@ -48,7 +48,7 @@ The Gmail plugin is a standard kimi-vault plugin that:
 2. Sign in with your Google account
 3. Click the project selector at the top
 4. Click **New Project**
-5. Enter a name (e.g., "kimi-vault-gmail")
+5. Enter a name (e.g., "nakimi-gmail")
 6. Click **Create**
 7. Wait for it to create, then select your new project
 
@@ -140,10 +140,10 @@ print(f"Refresh token: {credentials.refresh_token}")
 
 1. Copy the template:
    ```bash
-   cp config/secrets.template.json ~/.kimi-vault/secrets.json
+   cp config/secrets.template.json ~/.nakimi/secrets.json
    ```
 
-2. Edit `~/.kimi-vault/secrets.json`:
+2. Edit `~/.nakimi/secrets.json`:
    ```json
    {
      "gmail": {
@@ -157,15 +157,15 @@ print(f"Refresh token: {credentials.refresh_token}")
 
 3. Encrypt with your vault key:
    ```bash
-   age -r $(cat ~/.kimi-vault/key.txt.pub) \
-     -o ~/.kimi-vault/secrets.json.age \
-     ~/.kimi-vault/secrets.json
+   age -r $(cat ~/.nakimi/key.txt.pub) \
+     -o ~/.nakimi/secrets.json.age \
+     ~/.nakimi/secrets.json
    ```
 
 4. Securely delete plaintext:
    ```bash
-   shred -u ~/.kimi-vault/secrets.json
-   # Or on macOS: rm -P ~/.kimi-vault/secrets.json
+   shred -u ~/.nakimi/secrets.json
+   # Or on macOS: rm -P ~/.nakimi/secrets.json
    ```
 
 5. Also delete the downloaded client_secret.json:
@@ -177,30 +177,30 @@ print(f"Refresh token: {credentials.refresh_token}")
 
 ```bash
 # Check plugin loaded
-kimi-vault plugins list
+nakimi plugins list
 # Should show: gmail - Gmail integration - read, search, and send emails
 
 # Test commands
-kimi-vault gmail.profile
-kimi-vault gmail.unread
-kimi-vault gmail.labels
+nakimi gmail.profile
+nakimi gmail.unread
+nakimi gmail.labels
 
 # Search
-kimi-vault gmail.search "from:boss@company.com"
+nakimi gmail.search "from:boss@company.com"
 
 # Send a test email (to yourself)
-kimi-vault gmail.send "your-email@example.com" "Test" "This is a test email from kimi-vault!"
+nakimi gmail.send "your-email@example.com" "Test" "This is a test email from nakimi!"
 ```
 
 ## Using in a Session
 
 ```bash
 # Start a secure session
-kimi-vault session
+nakimi session
 
 # Inside the session, same commands work:
-$ kimi-vault gmail.unread 5
-$ kimi-vault gmail.search "subject:invoice"
+$ nakimi gmail.unread 5
+$ nakimi gmail.search "subject:invoice"
 ```
 
 The vault automatically:
@@ -212,12 +212,12 @@ The vault automatically:
 
 | Command | Description | Example |
 |---------|-------------|---------|
-| `gmail.profile` | Show your Gmail profile | `kimi-vault gmail.profile` |
-| `gmail.unread [limit]` | List unread emails (default: 10) | `kimi-vault gmail.unread 5` |
-| `gmail.labels` | List all labels | `kimi-vault gmail.labels` |
-| `gmail.search <query>` | Search emails | `kimi-vault gmail.search "from:google"` |
-| `gmail.send <to> <subject> <body>` | Send an email | `kimi-vault gmail.send "test@example.com" "Hi" "Hello"` |
-| `gmail.draft <to> <subject> <body>` | Create a draft | `kimi-vault gmail.draft "test@example.com" "Draft" "Content"` |
+| `gmail.profile` | Show your Gmail profile | `nakimi gmail.profile` |
+| `gmail.unread [limit]` | List unread emails (default: 10) | `nakimi gmail.unread 5` |
+| `gmail.labels` | List all labels | `nakimi gmail.labels` |
+| `gmail.search <query>` | Search emails | `nakimi gmail.search "from:google"` |
+| `gmail.send <to> <subject> <body>` | Send an email | `nakimi gmail.send "test@example.com" "Hi" "Hello"` |
+| `gmail.draft <to> <subject> <body>` | Create a draft | `nakimi gmail.draft "test@example.com" "Draft" "Content"` |
 
 ## Troubleshooting
 
@@ -247,10 +247,10 @@ Refresh tokens for "Testing" apps expire after 7 days.
 
 ```bash
 # Check if secrets file exists
-ls ~/.kimi-vault/secrets.json.age
+ls ~/.nakimi/secrets.json.age
 
 # Decrypt and verify content
-age -d -i ~/.kimi-vault/key.txt ~/.kimi-vault/secrets.json.age | python -m json.tool
+age -d -i ~/.nakimi/key.txt ~/.nakimi/secrets.json.age | python -m json.tool
 
 # Should have "gmail" section with all required fields
 ```
@@ -264,7 +264,7 @@ The plugin needs these fields in secrets.json:
 
 Check that all are present:
 ```bash
-age -d -i ~/.kimi-vault/key.txt ~/.kimi-vault/secrets.json.age | \
+age -d -i ~/.nakimi/key.txt ~/.nakimi/secrets.json.age | \
   python -c "import sys, json; d=json.load(sys.stdin); print('gmail' in d and all(k in d['gmail'] for k in ['client_id', 'client_secret', 'refresh_token']))"
 ```
 

@@ -8,7 +8,7 @@ has_children: true
 
 ## Overview
 
-This document covers security aspects of Kimi Secrets Vault, including threat model, encryption details, and security policies.
+This document covers security aspects of Nakimi, including threat model, encryption details, and security policies.
 
 ## Security Policy
 
@@ -18,7 +18,7 @@ For reporting security vulnerabilities, see the [Security Policy](SECURITY.md).
 
 ## Encryption Architecture
 
-Kimi Secrets Vault uses [age](https://age-encryption.org) (Actually Good Encryption) for modern, auditable encryption.
+Nakimi uses [age](https://age-encryption.org) (Actually Good Encryption) for modern, auditable encryption.
 
 ### Key Features
 
@@ -31,8 +31,8 @@ Kimi Secrets Vault uses [age](https://age-encryption.org) (Actually Good Encrypt
 
 ### Key Management
 
-- Private key: `~/.kimi-vault/key.txt` (keep this safe!)
-- Public key: `~/.kimi-vault/key.txt.pub` (can be shared for encryption)
+- Private key: `~/.nakimi/key.txt` (keep this safe!)
+- Public key: `~/.nakimi/key.txt.pub` (can be shared for encryption)
 - **Critical**: Back up your private key offline. Losing it means losing access to all encrypted secrets.
 
 ## Threat Model
@@ -68,7 +68,7 @@ Kimi Secrets Vault uses [age](https://age-encryption.org) (Actually Good Encrypt
 
 ### How Sessions Work
 
-1. User runs `kimi-vault session`
+1. User runs `nakimi session`
 2. Vault decrypts secrets to a temporary file in `/dev/shm` (RAM disk)
 3. Environment variables point plugins to the decrypted file
 4. User executes commands within the session
@@ -112,7 +112,7 @@ Users should:
 
 1. **Back up your private key** - Store it in a password manager or encrypted USB
 2. **Use strong authentication** - Protect your Google/GitHub accounts with 2FA
-3. **Regular updates** - Keep kimi-secrets-vault and plugins updated
+3. **Regular updates** - Keep nakimi and plugins updated
 4. **Monitor for anomalies** - Watch for unexpected behavior
 5. **Minimize plugin use** - Only enable plugins you actually need
 6. **Review permissions** - Understand what each plugin can access
@@ -140,7 +140,7 @@ If you suspect a security incident:
    - Scan for malware or keyloggers
 
 3. **Recovery**:
-   - Generate new age key pair (`kimi-vault init --force`)
+   - Generate new age key pair (`nakimi init --force`)
    - Re-encrypt secrets with new key
    - Update API credentials with new tokens
 
@@ -150,8 +150,8 @@ Security updates are released as patch versions (e.g., 1.0.0 → 1.0.1).
 
 ### Update Methods
 
-- **Built-in**: `kimi-vault upgrade`
-- **pip**: `pip install --upgrade kimi-secrets-vault`
+- **Built-in**: `nakimi upgrade`
+- **pip**: `pip install --upgrade nakimi`
 - **Manual**: Clone latest version and reinstall
 
 ### Monitoring for Updates
@@ -162,7 +162,7 @@ Security updates are released as patch versions (e.g., 1.0.0 → 1.0.1).
 
 ## Compliance Considerations
 
-Kimi Secrets Vault is **NOT** suitable for:
+Nakimi is **NOT** suitable for:
 
 - **Regulated environments** (HIPAA, PCI-DSS, SOC2)
 - **Enterprise use** (no RBAC, audit logging, or centralized management)

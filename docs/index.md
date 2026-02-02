@@ -3,12 +3,12 @@ title: HOME
 nav_order: 0
 ---
 
-# Kimi Secrets Vault
+# Nakimi
 
 Secure, plugin-based API credential management for AI assistants
 
 ## Overview
-Kimi Secrets Vault is a secure, plugin-based API credential management system for AI assistants with age encryption. It provides encrypted storage for API credentials with just-in-time decryption, plugin-based service integration, and a simple CLI interface.
+Nakimi is a secure, plugin-based API credential management system for AI assistants with age encryption. It provides encrypted storage for API credentials with just-in-time decryption, plugin-based service integration, and a simple CLI interface.
 
 ## Quick Links
 
@@ -43,7 +43,7 @@ Kimi Secrets Vault is a secure, plugin-based API credential management system fo
 **Active Development**: Yes
 
 ## Getting Help
-- [GitHub Issues](https://github.com/apitanga/kimi-secrets-vault/issues) - Report bugs or request features
+- [GitHub Issues](https://github.com/apitanga/nakimi/issues) - Report bugs or request features
 - [Contributing Guide](../CONTRIBUTING.md) - How to contribute
 - [Security Policy](security/SECURITY.md) - Security reporting and policies
 

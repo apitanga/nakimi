@@ -6,7 +6,7 @@ has_children: true
 
 # Development
 
-This section contains documentation for developers working with or contributing to Kimi Secrets Vault.
+This section contains documentation for developers working with or contributing to Nakimi.
 
 ## Contents
 
@@ -18,7 +18,7 @@ This section contains documentation for developers working with or contributing 
 
 ## Contributing
 
-If you want to contribute to Kimi Secrets Vault:
+If you want to contribute to Nakimi:
 
 1. Read the [Contributing Guide](../../CONTRIBUTING.md)
 2. Check the [Development Roadmap](../project/ROADMAP.md) for planned features

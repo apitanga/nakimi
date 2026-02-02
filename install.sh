@@ -1,5 +1,5 @@
 #!/bin/bash
-# Install or upgrade kimi-secrets-vault from GitHub
+# Install or upgrade nakimi from GitHub
 # Usage: curl -sSL https://raw.githubusercontent.com/apitanga/kimi-secrets-vault/main/install.sh | bash
 
 set -e
@@ -8,7 +8,7 @@ REPO_URL="https://github.com/apitanga/kimi-secrets-vault.git"
 VERSION="${1:-main}"  # Default to main branch, or specify version
 
 echo "╔════════════════════════════════════════════════════════════╗"
-echo "║       kimi-secrets-vault Installer/Upgrader                ║"
+echo "║       Nakimi Installer/Upgrader                ║"
 echo "╚════════════════════════════════════════════════════════════╝"
 echo ""
 
@@ -43,8 +43,8 @@ fi
 
 # Check if already installed
 echo ""
-if command -v kimi-vault &> /dev/null; then
-    CURRENT_VERSION=$(kimi-vault --version 2>&1 | head -1)
+if command -v nakimi &> /dev/null; then
+    CURRENT_VERSION=$(nakimi --version 2>&1 | head -1)
     echo "Current installation: $CURRENT_VERSION"
     echo ""
     
@@ -60,7 +60,7 @@ fi
 # Uninstall old version (if exists)
 echo ""
 echo "Step 1: Removing old installation (if any)..."
-pip3 uninstall kimi-secrets-vault -y 2>/dev/null || true
+pip3 uninstall nakimi -y 2>/dev/null || true
 echo "   ✓ Cleaned up"
 
 # Install new version
@@ -78,23 +78,23 @@ echo "   ✓ Installation complete"
 # Verify installation
 echo ""
 echo "Step 3: Verifying installation..."
-if command -v kimi-vault &> /dev/null; then
+if command -v nakimi &> /dev/null; then
     echo ""
-    kimi-vault --version
+    nakimi --version
     echo ""
-    echo "✅ kimi-vault is now installed!"
+    echo "✅ nakimi is now installed!"
     echo ""
     echo "Next steps:"
     echo "   1. Initialize your vault:"
-    echo "      kimi-vault init"
+    echo "      nakimi init"
     echo ""
     echo "   2. Check available plugins:"
-    echo "      kimi-vault plugins list"
+    echo "      nakimi plugins list"
     echo ""
     echo "   3. Start using it:"
-    echo "      kimi-vault gmail.inbox"
+    echo "      nakimi gmail.inbox"
     echo ""
-    echo "For help: kimi-vault --help"
+    echo "For help: nakimi --help"
 else
     echo "❌ Installation verification failed"
     echo "   Try running: pip3 install --user git+${REPO_URL}"

@@ -54,14 +54,14 @@ choco install age
 age --version
 ```
 
-## Step 2: Install kimi-secrets-vault
+## Step 2: Install nakimi
 
 ### Option A: Quick Install (Recommended)
 
 ```bash
 # Clone the repository
-git clone https://github.com/apitanga/kimi-secrets-vault.git
-cd kimi-secrets-vault
+git clone https://github.com/apitanga/nakimi.git
+cd nakimi
 
 # Run the installer
 ./install.sh
@@ -69,7 +69,7 @@ cd kimi-secrets-vault
 
 This will:
 - Install Python dependencies
-- Set up the vault directory (`~/.kimi-vault`)
+- Set up the vault directory (`~/.nakimi`)
 - Generate encryption keys
 - Add CLI tools to your PATH
 
@@ -77,8 +77,8 @@ This will:
 
 ```bash
 # Clone the repository
-git clone https://github.com/apitanga/kimi-secrets-vault.git
-cd kimi-secrets-vault
+git clone https://github.com/apitanga/nakimi.git
+cd nakimi
 
 # Create virtual environment (recommended)
 python3 -m venv venv
@@ -92,26 +92,26 @@ pip install -e .
 
 ```bash
 # Generate encryption key pair
-kimi-vault init
+nakimi init
 ```
 
 This creates:
-- `~/.kimi-vault/key.txt` - Private key (keep this safe!)
-- `~/.kimi-vault/key.txt.pub` - Public key (can be shared)
+- `~/.nakimi/key.txt` - Private key (keep this safe!)
+- `~/.nakimi/key.txt.pub` - Public key (can be shared)
 
 **IMPORTANT**: Back up your private key to a secure location (password manager, encrypted USB). If you lose this key, you cannot decrypt your secrets.
 
 ## Step 4: Configure (Optional)
 
-Create config file at `~/.config/kimi-vault/config`:
+Create config file at `~/.config/nakimi/config`:
 
 ```bash
-mkdir -p ~/.config/kimi-vault
-cat > ~/.config/kimi-vault/config << 'EOF'
-# Kimi Secrets Vault Configuration
+mkdir -p ~/.config/nakimi
+cat > ~/.config/nakimi/config << 'EOF'
+# Nakimi Configuration
 
-# vault_dir = ~/.kimi-vault
-# key_file = ~/.kimi-vault/key.txt
+# vault_dir = ~/.nakimi
+# key_file = ~/.nakimi/key.txt
 EOF
 ```
 
@@ -120,20 +120,20 @@ EOF
 1. Create or edit secrets template:
 ```bash
 # Copy template
-cp config/secrets.template.json ~/.kimi-vault/secrets.json
+cp config/secrets.template.json ~/.nakimi/secrets.json
 
 # Edit with your credentials
-vim ~/.kimi-vault/secrets.json
+vim ~/.nakimi/secrets.json
 ```
 
 2. Encrypt the secrets:
 ```bash
-age -r $(cat ~/.kimi-vault/key.txt.pub) \
-  -o ~/.kimi-vault/secrets.json.age \
-  ~/.kimi-vault/secrets.json
+age -r $(cat ~/.nakimi/key.txt.pub) \
+  -o ~/.nakimi/secrets.json.age \
+  ~/.nakimi/secrets.json
 
 # Securely delete plaintext
-shred -u ~/.kimi-vault/secrets.json
+shred -u ~/.nakimi/secrets.json
 ```
 
 ## Step 6: Set Up Plugins
@@ -155,23 +155,23 @@ To enable the Gmail plugin, see [Gmail Setup Guide](../plugins/GMAIL_SETUP.md).
 
 ```bash
 # Check CLI is available
-kimi-vault --help
+nakimi --help
 
 # Test vault initialization
-kimi-vault init --check
+nakimi init --check
 
 # Check which plugins are available
-kimi-vault plugins list
+nakimi plugins list
 
 # List available commands
-kimi-vault plugins commands
+nakimi plugins commands
 
 # Start a secure session
-kimi-vault session
+nakimi session
 
 # Inside session, test commands
-$ kimi-vault gmail.profile
-$ kimi-vault gmail.unread 5
+$ nakimi gmail.profile
+$ nakimi gmail.unread 5
 ```
 
 ## Verification
@@ -180,34 +180,34 @@ Test your installation:
 
 ```bash
 # Check CLI is available
-kimi-vault --help
+nakimi --help
 
 # Test vault initialization
-kimi-vault init
+nakimi init
 
 # Check which plugins are available
-kimi-vault plugins list
+nakimi plugins list
 
 # List available commands
-kimi-vault plugins commands
+nakimi plugins commands
 ```
 
 ## Uninstallation
 
 ```bash
 # Remove the package
-cd kimi-secrets-vault
-pip uninstall kimi-secrets-vault
+cd nakimi
+pip uninstall nakimi
 
 # Remove vault (WARNING: This deletes your encrypted secrets!)
-rm -rf ~/.kimi-vault
+rm -rf ~/.nakimi
 
 # Remove config
-rm -rf ~/.config/kimi-vault
+rm -rf ~/.config/nakimi
 
 # Remove the repository
 cd ..
-rm -rf kimi-secrets-vault
+rm -rf nakimi
 ```
 
 ## Troubleshooting
@@ -219,28 +219,28 @@ Make sure `age` is installed and in your PATH. See Step 1.
 ### "Permission denied" when running scripts
 
 ```bash
-chmod +x bin/kimi-vault bin/kimi-vault-session
+chmod +x bin/nakimi bin/nakimi-session
 ```
 
 ### Python module not found
 
 Make sure you've activated your virtual environment, or use the full path:
 ```bash
-PYTHONPATH=src python -m kimi_vault.cli --help
+PYTHONPATH=src python -m nakimi.cli --help
 ```
 
 ### Can't decrypt vault
 
-- Check that your private key exists: `ls ~/.kimi-vault/key.txt`
-- Check that your encrypted secrets exist: `ls ~/.kimi-vault/secrets.json.age`
-- Try decrypting manually: `age -d -i ~/.kimi-vault/key.txt ~/.kimi-vault/secrets.json.age`
+- Check that your private key exists: `ls ~/.nakimi/key.txt`
+- Check that your encrypted secrets exist: `ls ~/.nakimi/secrets.json.age`
+- Try decrypting manually: `age -d -i ~/.nakimi/key.txt ~/.nakimi/secrets.json.age`
 
 ### Plugin not loading
 
 1. Check that credentials are in your secrets file:
    ```bash
    # Decrypt and view
-   age -d -i ~/.kimi-vault/key.txt ~/.kimi-vault/secrets.json.age | python -m json.tool
+   age -d -i ~/.nakimi/key.txt ~/.nakimi/secrets.json.age | python -m json.tool
    ```
 
 2. Verify the plugin section name matches:
@@ -255,7 +255,7 @@ PYTHONPATH=src python -m kimi_vault.cli --help
 
 3. Check plugin list:
    ```bash
-   kimi-vault plugins list
+   nakimi plugins list
    ```
 
 ### "No module named 'google'" (Gmail plugin)

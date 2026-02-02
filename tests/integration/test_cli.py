@@ -8,7 +8,7 @@ from unittest.mock import patch, Mock, mock_open
 
 import pytest
 
-from kimi_vault.cli.main import main
+from nakimi.cli.main import main
 
 
 class TestCLIParsing:
@@ -26,8 +26,8 @@ class TestCLIParsing:
 class TestCLIExecution:
     """Test CLI command execution."""
     
-    @patch('kimi_vault.cli.main.Vault')
-    @patch('sys.argv', ['kimi-vault', 'init'])
+    @patch('nakimi.cli.main.Vault')
+    @patch('sys.argv', ['nakimi', 'init'])
     def test_cli_init(self, mock_vault_class):
         """Test init command execution."""
         mock_vault = Mock()
@@ -51,8 +51,8 @@ class TestCLIExecution:
         assert "Key generated!" in output
         mock_vault.generate_key.assert_called_once()
     
-    @patch('kimi_vault.cli.main.Vault')
-    @patch('sys.argv', ['kimi-vault', 'encrypt', 'input.txt', '-o', 'output.age'])
+    @patch('nakimi.cli.main.Vault')
+    @patch('sys.argv', ['nakimi', 'encrypt', 'input.txt', '-o', 'output.age'])
     @patch('pathlib.Path.exists')
     def test_cli_encrypt(self, mock_exists, mock_vault_class):
         """Test encrypt command execution."""
@@ -77,8 +77,8 @@ class TestCLIExecution:
             "output.age"
         )
     
-    @patch('kimi_vault.cli.main.Vault')
-    @patch('sys.argv', ['kimi-vault', 'decrypt', 'secrets.json.age', '-o', 'output.json'])
+    @patch('nakimi.cli.main.Vault')
+    @patch('sys.argv', ['nakimi', 'decrypt', 'secrets.json.age', '-o', 'output.json'])
     @patch('pathlib.Path.exists')
     def test_cli_decrypt(self, mock_exists, mock_vault_class):
         """Test decrypt command execution."""
@@ -103,13 +103,13 @@ class TestCLIExecution:
             "output.json"
         )
     
-    @patch('kimi_vault.cli.main.get_config')
-    @patch('kimi_vault.cli.main.Vault')
-    @patch('kimi_vault.cli.main.PluginManager')
-    @patch('sys.argv', ['kimi-vault', 'plugins', 'list'])
+    @patch('nakimi.cli.main.get_config')
+    @patch('nakimi.cli.main.Vault')
+    @patch('nakimi.cli.main.PluginManager')
+    @patch('sys.argv', ['nakimi', 'plugins', 'list'])
     @patch('pathlib.Path.exists')
-    @patch('kimi_vault.cli.main.secure_delete')
-    @patch('kimi_vault.cli.main.json.load')
+    @patch('nakimi.cli.main.secure_delete')
+    @patch('nakimi.cli.main.json.load')
     @patch('builtins.open')
     def test_cli_plugins_list(self, mock_open, mock_json_load, mock_secure_delete, mock_exists, mock_pm_class, mock_vault_class, mock_get_config):
         """Test plugins list command."""
@@ -155,13 +155,13 @@ class TestCLIExecution:
         # Verify secrets were loaded
         mock_vault.decrypt.assert_called_once_with(mock_config.secrets_file)
     
-    @patch('kimi_vault.cli.main.get_config')
-    @patch('kimi_vault.cli.main.Vault')
-    @patch('kimi_vault.cli.main.PluginManager')
-    @patch('sys.argv', ['kimi-vault', 'plugins', 'commands'])
+    @patch('nakimi.cli.main.get_config')
+    @patch('nakimi.cli.main.Vault')
+    @patch('nakimi.cli.main.PluginManager')
+    @patch('sys.argv', ['nakimi', 'plugins', 'commands'])
     @patch('pathlib.Path.exists')
-    @patch('kimi_vault.cli.main.secure_delete')
-    @patch('kimi_vault.cli.main.json.load')
+    @patch('nakimi.cli.main.secure_delete')
+    @patch('nakimi.cli.main.json.load')
     @patch('builtins.open')
     def test_cli_plugins_commands(self, mock_open, mock_json_load, mock_secure_delete, mock_exists, mock_pm_class, mock_vault_class, mock_get_config):
         """Test plugins commands command."""
@@ -205,13 +205,13 @@ class TestCLIExecution:
         
         mock_pm.list_commands.assert_called_once_with()
     
-    @patch('kimi_vault.cli.main.get_config')
-    @patch('kimi_vault.cli.main.Vault')
-    @patch('kimi_vault.cli.main.PluginManager')
-    @patch('sys.argv', ['kimi-vault', 'gmail.unread', '5'])
+    @patch('nakimi.cli.main.get_config')
+    @patch('nakimi.cli.main.Vault')
+    @patch('nakimi.cli.main.PluginManager')
+    @patch('sys.argv', ['nakimi', 'gmail.unread', '5'])
     @patch('pathlib.Path.exists')
-    @patch('kimi_vault.cli.main.secure_delete')
-    @patch('kimi_vault.cli.main.json.load')
+    @patch('nakimi.cli.main.secure_delete')
+    @patch('nakimi.cli.main.json.load')
     @patch('builtins.open')
     def test_cli_plugin_command(self, mock_open, mock_json_load, mock_secure_delete, mock_exists, mock_pm_class, mock_vault_class, mock_get_config):
         """Test executing a plugin command via CLI."""
@@ -254,13 +254,13 @@ class TestCLIExecution:
         
         mock_pm.execute_command.assert_called_once_with("gmail.unread", ["5"])
     
-    @patch('kimi_vault.cli.main.get_config')
-    @patch('kimi_vault.cli.main.Vault')
-    @patch('kimi_vault.cli.main.PluginManager')
-    @patch('sys.argv', ['kimi-vault', 'gmail.unread'])
+    @patch('nakimi.cli.main.get_config')
+    @patch('nakimi.cli.main.Vault')
+    @patch('nakimi.cli.main.PluginManager')
+    @patch('sys.argv', ['nakimi', 'gmail.unread'])
     @patch('pathlib.Path.exists')
-    @patch('kimi_vault.cli.main.secure_delete')
-    @patch('kimi_vault.cli.main.json.load')
+    @patch('nakimi.cli.main.secure_delete')
+    @patch('nakimi.cli.main.json.load')
     @patch('builtins.open')
     def test_cli_plugin_command_error(self, mock_open, mock_json_load, mock_secure_delete, mock_exists, mock_pm_class, mock_vault_class, mock_get_config):
         """Test plugin command execution error."""
@@ -277,7 +277,7 @@ class TestCLIExecution:
         
         # Mock plugin manager
         mock_pm = Mock()
-        from kimi_vault.core.plugin import PluginError
+        from nakimi.core.plugin import PluginError
         mock_pm.execute_command.side_effect = PluginError("Plugin error")
         mock_pm_class.return_value = mock_pm
         
@@ -305,13 +305,13 @@ class TestCLIExecution:
         assert "❌" in output
         assert "Plugin error" in output
     
-    @patch('kimi_vault.cli.main.get_config')
-    @patch('kimi_vault.cli.main.Vault')
-    @patch('kimi_vault.cli.main.PluginManager')
-    @patch('sys.argv', ['kimi-vault', 'unknown.command'])
+    @patch('nakimi.cli.main.get_config')
+    @patch('nakimi.cli.main.Vault')
+    @patch('nakimi.cli.main.PluginManager')
+    @patch('sys.argv', ['nakimi', 'unknown.command'])
     @patch('pathlib.Path.exists')
-    @patch('kimi_vault.cli.main.secure_delete')
-    @patch('kimi_vault.cli.main.json.load')
+    @patch('nakimi.cli.main.secure_delete')
+    @patch('nakimi.cli.main.json.load')
     @patch('builtins.open')
     def test_cli_unknown_command(self, mock_open, mock_json_load, mock_secure_delete, mock_exists, mock_pm_class, mock_vault_class, mock_get_config):
         """Test unknown command handling."""
@@ -328,7 +328,7 @@ class TestCLIExecution:
         
         # Mock plugin manager
         mock_pm = Mock()
-        from kimi_vault.core.plugin import PluginError
+        from nakimi.core.plugin import PluginError
         mock_pm.execute_command.side_effect = PluginError("Unknown command: unknown.command")
         mock_pm_class.return_value = mock_pm
         
@@ -355,7 +355,7 @@ class TestCLIExecution:
         output = captured_output.getvalue()
         assert "❌" in output
     
-    @patch('sys.argv', ['kimi-vault', '--help'])
+    @patch('sys.argv', ['nakimi', '--help'])
     def test_cli_help(self):
         """Test help command."""
         captured_output = StringIO()
@@ -373,10 +373,10 @@ class TestCLIExecution:
         assert "Commands" in output
         assert "Examples" in output
     
-    @patch('kimi_vault.cli.main.get_config')
-    @patch('kimi_vault.cli.main.Vault')
-    @patch('kimi_vault.cli.main.PluginManager')
-    @patch('sys.argv', ['kimi-vault', 'session', '--help'])
+    @patch('nakimi.cli.main.get_config')
+    @patch('nakimi.cli.main.Vault')
+    @patch('nakimi.cli.main.PluginManager')
+    @patch('sys.argv', ['nakimi', 'session', '--help'])
     def test_cli_session_command(self, mock_pm_class, mock_vault_class, mock_get_config):
         """Test session command (basic test - session is complex)."""
         # This is a basic test since session involves interactive shell

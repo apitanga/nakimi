@@ -1,10 +1,10 @@
-# 🔐 Kimi Secrets Vault
+# 🔐 Nakimi
 
 Secure, plugin-based API credential management for AI assistants.
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Documentation](https://img.shields.io/badge/docs-GitHub_Pages-blue)](https://apitanga.github.io/kimi-secrets-vault/)
+[![Documentation](https://img.shields.io/badge/docs-GitHub_Pages-blue)](https://apitanga.github.io/nakimi/)
 
 ## What is this?
 
@@ -31,13 +31,13 @@ A secure vault that stores your API credentials encrypted at rest, decrypts them
 
 ```bash
 # AI assistant runs in secure session
-kimi-vault session
-$ kimi-vault gmail.search "meeting tomorrow"
-$ kimi-vault calendar.today
+nakimi session
+$ nakimi gmail.search "meeting tomorrow"
+$ nakimi calendar.today
 ```
 
 **Threat assumptions**:
-- Attacker has access to your user account (can read ~/.kimi-vault/)
+- Attacker has access to your user account (can read ~/.nakimi/)
 - Attacker does NOT have root (can't dump locked memory)
 - Physical machine is secure (laptop in your possession)
 - Full Disk Encryption is enabled
@@ -49,7 +49,7 @@ $ kimi-vault calendar.today
 
 ```bash
 # In your script
-kimi-vault session --exec ./deploy.sh
+nakimi session --exec ./deploy.sh
 # deploy.sh can use gmail.send, github.issues, etc.
 ```
 
@@ -64,7 +64,7 @@ kimi-vault session --exec ./deploy.sh
 
 ```bash
 # Ask AI: "Show me my unread GitHub notifications"
-# AI runs: kimi-vault github.notifications
+# AI runs: nakimi github.notifications
 ```
 
 **Threat assumptions**:
@@ -85,7 +85,7 @@ kimi-vault session --exec ./deploy.sh
 
 ### 1. Install age (REQUIRED - System Dependency)
 
-**kimi-secrets-vault requires the `age` encryption tool.** Install it first:
+**nakimi requires the `age` encryption tool.** Install it first:
 
 ```bash
 # macOS
@@ -100,23 +100,23 @@ sudo dnf install age
 # Or download from https://github.com/FiloSottile/age/releases
 ```
 
-### 2. Install kimi-secrets-vault
+### 2. Install nakimi
 
 **Option A: Install from GitHub (Recommended for users)**
 
 ```bash
 # Latest version
-pip install git+https://github.com/apitanga/kimi-secrets-vault.git
+pip install git+https://github.com/apitanga/nakimi.git
 
 # Specific version
-pip install git+https://github.com/apitanga/kimi-secrets-vault.git@v1.0.0
+pip install git+https://github.com/apitanga/nakimi.git@v1.0.0
 ```
 
 **Option B: Clone and install locally (for development)**
 
 ```bash
-git clone https://github.com/apitanga/kimi-secrets-vault.git
-cd kimi-secrets-vault
+git clone https://github.com/apitanga/nakimi.git
+cd nakimi
 pip install .
 
 # Or for development (editable install):
@@ -126,19 +126,19 @@ pip install -e .
 **Option C: One-line install script**
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/apitanga/kimi-secrets-vault/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/apitanga/nakimi/main/install.sh | bash
 ```
 
 ### 2. Initialize Vault
 
 ```bash
 # Generate encryption key pair
-kimi-vault init
+nakimi init
 
 # Output:
 # 🔐 Generating new age key pair...
 # ✅ Key generated!
-#    Private key: ~/.kimi-vault/key.txt
+#    Private key: ~/.nakimi/key.txt
 #    Public key: age1...
 #
 # ⚠️  IMPORTANT: Back up your private key!
@@ -150,18 +150,18 @@ kimi-vault init
 
 ```bash
 # 1. Copy template
-cp config/secrets.template.json ~/.kimi-vault/secrets.json
+cp config/secrets.template.json ~/.nakimi/secrets.json
 
 # 2. Edit with your Gmail OAuth credentials
-vim ~/.kimi-vault/secrets.json
+vim ~/.nakimi/secrets.json
 
 # 3. Encrypt
-age -r $(cat ~/.kimi-vault/key.txt.pub) \
-  -o ~/.kimi-vault/secrets.json.age \
-  ~/.kimi-vault/secrets.json
+age -r $(cat ~/.nakimi/key.txt.pub) \
+  -o ~/.nakimi/secrets.json.age \
+  ~/.nakimi/secrets.json
 
 # 4. Securely delete plaintext
-shred -u ~/.kimi-vault/secrets.json
+shred -u ~/.nakimi/secrets.json
 ```
 
 See [docs/plugins/GMAIL_SETUP.md](docs/plugins/GMAIL_SETUP.md) for detailed Gmail OAuth instructions.
@@ -170,14 +170,14 @@ See [docs/plugins/GMAIL_SETUP.md](docs/plugins/GMAIL_SETUP.md) for detailed Gmai
 
 ```bash
 # Plugin commands work immediately
-kimi-vault gmail.unread              # List unread emails
-kimi-vault gmail.search "from:boss"  # Search emails
-kimi-vault gmail.profile             # Show account info
+nakimi gmail.unread              # List unread emails
+nakimi gmail.search "from:boss"  # Search emails
+nakimi gmail.profile             # Show account info
 
 # Start a secure session
-kimi-vault session
+nakimi session
 # Inside session, same commands work:
-# $ kimi-vault gmail.unread
+# $ nakimi gmail.unread
 ```
 
 ## Architecture
@@ -185,8 +185,8 @@ kimi-vault session
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                         CLI Layer                                │
-│  kimi-vault <plugin>.<command> [args]                           │
-│  Example: kimi-vault gmail.unread --limit=5                     │
+│  nakimi <plugin>.<command> [args]                           │
+│  Example: nakimi gmail.unread --limit=5                     │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
@@ -222,7 +222,7 @@ kimi-vault session
 
 **At Rest:**
 - Credentials encrypted with [age](https://age-encryption.org)
-- Private key stored in `~/.kimi-vault/key.txt`
+- Private key stored in `~/.nakimi/key.txt`
 
 **In Session:**
 - Vault decrypts to temp file on demand
@@ -239,27 +239,27 @@ kimi-vault session
 ### Vault Management
 
 ```bash
-kimi-vault init                              # Generate encryption keys
-kimi-vault encrypt <file> [-o output]        # Encrypt a file
-kimi-vault decrypt <file.age> [-o output]    # Decrypt a file
-kimi-vault session                           # Start secure session
-kimi-vault --version                         # Show version info
+nakimi init                              # Generate encryption keys
+nakimi encrypt <file> [-o output]        # Encrypt a file
+nakimi decrypt <file.age> [-o output]    # Decrypt a file
+nakimi session                           # Start secure session
+nakimi --version                         # Show version info
 ```
 
 ### Upgrading
 
 ```bash
 # Check current version
-kimi-vault --version
+nakimi --version
 
 # Upgrade to latest version from GitHub
-kimi-vault upgrade
+nakimi upgrade
 
 # Upgrade to specific version
-kimi-vault upgrade --version 1.1.0
+nakimi upgrade --version 1.1.0
 
 # Or use pip directly
-pip install --upgrade git+https://github.com/apitanga/kimi-secrets-vault.git
+pip install --upgrade git+https://github.com/apitanga/nakimi.git
 ```
 
 ### Plugin Commands
@@ -267,35 +267,35 @@ pip install --upgrade git+https://github.com/apitanga/kimi-secrets-vault.git
 #### Gmail Plugin
 
 ```bash
-kimi-vault gmail.unread [limit]              # List unread emails
-kimi-vault gmail.search <query> [limit]      # Search emails
-kimi-vault gmail.labels                      # List labels
-kimi-vault gmail.profile                     # Show account info
-kimi-vault gmail.draft <to> <subject> <body> # Create draft
-kimi-vault gmail.send <to> <subject> <body>  # Send email
+nakimi gmail.unread [limit]              # List unread emails
+nakimi gmail.search <query> [limit]      # Search emails
+nakimi gmail.labels                      # List labels
+nakimi gmail.profile                     # Show account info
+nakimi gmail.draft <to> <subject> <body> # Create draft
+nakimi gmail.send <to> <subject> <body>  # Send email
 ```
 
 **Examples:**
 
 ```bash
 # List 5 unread emails
-kimi-vault gmail.unread 5
+nakimi gmail.unread 5
 
 # Search for emails from boss
-kimi-vault gmail.search "from:boss@company.com"
+nakimi gmail.search "from:boss@company.com"
 
 # Search with date range
-kimi-vault gmail.search "after:2026/01/01 before:2026/01/31"
+nakimi gmail.search "after:2026/01/01 before:2026/01/31"
 
 # Send quick email
-kimi-vault gmail.send "colleague@example.com" "Quick question" "Hey, can we chat?"
+nakimi gmail.send "colleague@example.com" "Quick question" "Hey, can we chat?"
 ```
 
 ### Plugin Management
 
 ```bash
-kimi-vault plugins list                      # List loaded plugins
-kimi-vault plugins commands                  # List all available commands
+nakimi plugins list                      # List loaded plugins
+nakimi plugins commands                  # List all available commands
 ```
 
 ## Configuration
@@ -304,17 +304,17 @@ kimi-vault plugins commands                  # List all available commands
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `KIMI_VAULT_DIR` | Vault directory | `~/.kimi-vault` |
-| `KIMI_VAULT_KEY` | Private key path | `~/.kimi-vault/key.txt` |
-| `KIMI_VAULT_SECRETS` | Encrypted secrets path | `~/.kimi-vault/secrets.json.age` |
+| `NAKIMI_DIR` | Vault directory | `~/.nakimi` |
+| `NAKIMI_KEY` | Private key path | `~/.nakimi/key.txt` |
+| `NAKIMI_SECRETS` | Encrypted secrets path | `~/.nakimi/secrets.json.age` |
 
 ### Config File
 
-Create `~/.config/kimi-vault/config`:
+Create `~/.config/nakimi/config`:
 
 ```bash
-vault_dir = ~/.kimi-vault
-key_file = ~/.kimi-vault/key.txt
+vault_dir = ~/.nakimi
+key_file = ~/.nakimi/key.txt
 ```
 
 ## Creating a Plugin
@@ -324,15 +324,15 @@ Want to add a new service? Here's the pattern:
 ### 1. Create Plugin Directory
 
 ```bash
-mkdir src/kimi_vault/plugins/myservice
-touch src/kimi_vault/plugins/myservice/__init__.py
+mkdir src/nakimi/plugins/myservice
+touch src/nakimi/plugins/myservice/__init__.py
 ```
 
 ### 2. Implement Plugin Class
 
 ```python
-# src/kimi_vault/plugins/myservice/plugin.py
-from kimi_vault.core.plugin import Plugin, PluginCommand, PluginError
+# src/nakimi/plugins/myservice/plugin.py
+from nakimi.core.plugin import Plugin, PluginCommand, PluginError
 
 class MyServicePlugin(Plugin):
     @property
@@ -379,7 +379,7 @@ Update `config/secrets.template.json`:
 ### 4. Use It
 
 ```bash
-kimi-vault myservice.list
+nakimi myservice.list
 ```
 
 ## Python API
@@ -387,8 +387,8 @@ kimi-vault myservice.list
 ### Using Plugins Directly
 
 ```python
-from kimi_vault.core import Vault, get_config
-from kimi_vault.plugins.gmail import GmailClient
+from nakimi.core import Vault, get_config
+from nakimi.plugins.gmail import GmailClient
 
 # Load secrets
 config = get_config()
@@ -405,14 +405,14 @@ for email in client.list_unread():
     print(f"{email['subject']} from {email['from']}")
 
 # Clean up
-from kimi_vault.core import secure_delete
+from nakimi.core import secure_delete
 secure_delete(secrets_path)
 ```
 
 ### Creating Custom Plugins
 
 ```python
-from kimi_vault.core.plugin import Plugin, PluginCommand
+from nakimi.core.plugin import Plugin, PluginCommand
 
 class CustomPlugin(Plugin):
     @property
@@ -435,7 +435,7 @@ class CustomPlugin(Plugin):
 - **Cleanup**: Securely shredded via `shred` (not just deleted)
 - **Session isolation**: Each session gets unique temp file
 
-**⚠️ Important:** Back up your `~/.kimi-vault/key.txt` offline. Lose this key = lose access to all secrets.
+**⚠️ Important:** Back up your `~/.nakimi/key.txt` offline. Lose this key = lose access to all secrets.
 
 **⚠️ Security Note on SSDs:** 
 
@@ -485,11 +485,11 @@ See [Git Hooks Documentation](docs/development/GIT_HOOKS.md) for detailed docume
 
 ```bash
 # Install from GitHub (recommended)
-pip install git+https://github.com/apitanga/kimi-secrets-vault.git
+pip install git+https://github.com/apitanga/nakimi.git
 
 # Or clone and install locally
-git clone https://github.com/apitanga/kimi-secrets-vault.git
-cd kimi-secrets-vault
+git clone https://github.com/apitanga/nakimi.git
+cd nakimi
 pip install .
 ```
 
@@ -497,20 +497,20 @@ pip install .
 
 ```bash
 # Built-in upgrade command
-kimi-vault upgrade
+nakimi upgrade
 
 # Upgrade to specific version
-kimi-vault upgrade --version 1.1.0
+nakimi upgrade --version 1.1.0
 
 # Or reinstall with pip
-pip install --upgrade git+https://github.com/apitanga/kimi-secrets-vault.git
+pip install --upgrade git+https://github.com/apitanga/nakimi.git
 ```
 
 ### Development Install
 
 ```bash
-git clone https://github.com/apitanga/kimi-secrets-vault.git
-cd kimi-secrets-vault
+git clone https://github.com/apitanga/nakimi.git
+cd nakimi
 pip install -e .  # Editable install
 ```
 

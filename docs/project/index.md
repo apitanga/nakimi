@@ -6,7 +6,7 @@ has_children: true
 
 # Project
 
-This section contains project management documents, reports, and planning information for Kimi Secrets Vault.
+This section contains project management documents, reports, and planning information for Nakimi.
 
 ## Contents
 
@@ -26,4 +26,4 @@ If you're interested in contributing to the project:
 1. Check the [Development Roadmap](ROADMAP.md) for planned features
 2. Review the [Grade Report](GRADE_REPORT.md) to understand current project status
 3. Read the [Contributing Guide](../../CONTRIBUTING.md) for contribution guidelines
-4. Join discussions in [GitHub Issues](https://github.com/apitanga/kimi-secrets-vault/issues)
+4. Join discussions in [GitHub Issues](https://github.com/apitanga/nakimi/issues)

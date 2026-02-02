@@ -6,7 +6,7 @@ parent: Development
 
 # Architecture
 
-System design and implementation of kimi-secrets-vault.
+System design and implementation of nakimi.
 
 ---
 
@@ -126,7 +126,7 @@ Vault shreds temp file (on session end)
 ## Code Organization
 
 ```
-src/kimi_vault/
+src/nakimi/
 ├── __init__.py
 ├── core/
 │   ├── __init__.py
@@ -170,13 +170,13 @@ src/kimi_vault/
 ### Session Mode
 
 ```
-User: kimi-vault session
+User: nakimi session
         ↓
 Vault.decrypt() → /tmp/secrets-abc123.json
         ↓
-Shell starts with KIMI_VAULT_SECRETS=/tmp/secrets-abc123.json
+Shell starts with NAKIMI_SECRETS=/tmp/secrets-abc123.json
         ↓
-User: kimi-vault gmail.unread
+User: nakimi gmail.unread
         ↓
 Plugin reads from /tmp/secrets-abc123.json
         ↓
@@ -188,7 +188,7 @@ Vault.cleanup() → shred /tmp/secrets-abc123.json
 ### Command Mode
 
 ```
-User: kimi-vault gmail.unread 5
+User: nakimi gmail.unread 5
         ↓
 Vault.decrypt() → /tmp/secrets-xyz789.json
         ↓
@@ -207,14 +207,14 @@ Vault.cleanup() → shred /tmp/secrets-xyz789.json
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `KIMI_VAULT_DIR` | `~/.kimi-vault` | Vault directory |
-| `KIMI_VAULT_KEY` | `~/.kimi-vault/key.txt` | Private key file |
-| `KIMI_VAULT_SECRETS` | (auto) | Temp secrets file path |
+| `NAKIMI_DIR` | `~/.nakimi` | Vault directory |
+| `NAKIMI_KEY` | `~/.nakimi/key.txt` | Private key file |
+| `NAKIMI_SECRETS` | (auto) | Temp secrets file path |
 
 ### File Structure
 
 ```
-~/.kimi-vault/
+~/.nakimi/
 ├── key.txt              # Private key (chmod 600)
 ├── key.txt.pub         # Public key
 └── secrets.json.age    # Encrypted credentials
@@ -242,7 +242,7 @@ AI Assistant → MCP Client → MCP Server → Plugins → Vault
 Allow third-party plugins:
 
 ```
-~/.kimi-vault/plugins/
+~/.nakimi/plugins/
 ├── community/          # Community plugins
 │   ├── twitter/
 │   └── linkedin/

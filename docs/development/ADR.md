@@ -6,7 +6,7 @@ parent: Development
 
 # Architecture Decision Records
 
-Key design decisions and their rationale for kimi-secrets-vault.
+Key design decisions and their rationale for nakimi.
 
 ---
 
@@ -115,10 +115,10 @@ with vault.session():
 
 **Examples**:
 ```bash
-kimi-vault gmail.unread
-kimi-vault gmail.search "query"
-kimi-vault calendar.today
-kimi-vault github.issues
+nakimi gmail.unread
+nakimi gmail.search "query"
+nakimi calendar.today
+nakimi github.issues
 ```
 
 **Consequences**:
@@ -128,9 +128,9 @@ kimi-vault github.issues
 - ❌ Can't have commands with dots in name (non-issue in practice)
 
 **Alternatives Considered**:
-- **Subcommands**: `kimi-vault gmail unread` (more typing, less clear)
-- **Flags**: `kimi-vault --plugin=gmail --command=unread` (too verbose)
-- **Combined**: `kimi-vault gmail-unread` (loses semantic grouping)
+- **Subcommands**: `nakimi gmail unread` (more typing, less clear)
+- **Flags**: `nakimi --plugin=gmail --command=unread` (too verbose)
+- **Combined**: `nakimi gmail-unread` (loses semantic grouping)
 
 ---
 
@@ -245,8 +245,8 @@ plugins/gmail/
 
 **Implementation**:
 ```python
-VAULT_DIR = os.getenv('KIMI_VAULT_DIR', os.path.expanduser('~/.kimi-vault'))
-KEY_FILE = os.getenv('KIMI_VAULT_KEY', f'{VAULT_DIR}/key.txt')
+VAULT_DIR = os.getenv('NAKIMI_DIR', os.path.expanduser('~/.nakimi'))
+KEY_FILE = os.getenv('NAKIMI_KEY', f'{VAULT_DIR}/key.txt')
 ```
 
 **Consequences**:
@@ -270,8 +270,8 @@ KEY_FILE = os.getenv('KIMI_VAULT_KEY', f'{VAULT_DIR}/key.txt')
 
 **Structure**:
 ```
-kimi-secrets-vault/
-├── src/kimi_vault/    # Source code
+nakimi/
+├── src/nakimi/    # Source code
 ├── tests/             # Tests
 ├── pyproject.toml     # Package metadata
 └── install.sh         # Convenience installer

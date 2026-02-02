@@ -6,7 +6,7 @@ has_children: true
 
 # Plugins
 
-Kimi Secrets Vault uses a plugin-based architecture to integrate with various services. Each plugin provides credential management for a specific API or service.
+Nakimi uses a plugin-based architecture to integrate with various services. Each plugin provides credential management for a specific API or service.
 
 ## Available Plugins
 

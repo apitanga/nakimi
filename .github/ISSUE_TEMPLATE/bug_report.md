@@ -11,7 +11,7 @@ assignees: ''
 A clear and concise description of what the bug is.
 
 ## Steps to Reproduce
-1. Command executed: `kimi-vault ...`
+1. Command executed: `nakimi ...`
 2. Configuration used: (paste relevant config or describe)
 3. Expected behavior: 
 4. Actual behavior:
@@ -19,13 +19,13 @@ A clear and concise description of what the bug is.
 ## Environment
 - **OS**: [e.g., Ubuntu 22.04, macOS 14.0, Windows 11]
 - **Python Version**: [e.g., 3.9.18]
-- **kimi-vault Version**: [e.g., 1.0.0 or git commit hash]
+- **nakimi Version**: [e.g., 1.0.0 or git commit hash]
 - **age Version**: [e.g., 1.1.1]
 - **Installation Method**: [e.g., pip install, install.sh, from source]
 
 ## Configuration
 ```
-# Paste relevant configuration from ~/.config/kimi-vault/config
+# Paste relevant configuration from ~/.config/nakimi/config
 # or describe your setup
 ```
 

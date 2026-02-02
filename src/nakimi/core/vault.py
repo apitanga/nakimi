@@ -103,7 +103,7 @@ def get_secure_temp_dir() -> Optional[Path]:
         if shm_path.exists() and shm_path.is_dir():
             # Check if we can write to it
             try:
-                test_file = shm_path / ".kimi-vault-test"
+                test_file = shm_path / ".nakimi-test"
                 test_file.touch()
                 test_file.unlink()
                 return shm_path
@@ -137,10 +137,10 @@ class Vault:
         Initialize vault.
         
         Args:
-            key_file: Path to age private key (default: ~/.kimi-vault/key.txt)
-            vault_dir: Directory for vault files (default: ~/.kimi-vault)
+            key_file: Path to age private key (default: ~/.nakimi/key.txt)
+            vault_dir: Directory for vault files (default: ~/.nakimi)
         """
-        self.vault_dir = Path(vault_dir).expanduser() if vault_dir else Path.home() / ".kimi-vault"
+        self.vault_dir = Path(vault_dir).expanduser() if vault_dir else Path.home() / ".nakimi"
         self.key_file = Path(key_file).expanduser() if key_file else self.vault_dir / "key.txt"
         self.key_pub_file = Path(str(self.key_file) + ".pub")
     
@@ -290,7 +290,7 @@ class Vault:
             if temp_dir:
                 # Use RAM-backed temp directory
                 fd, output_path = tempfile.mkstemp(
-                    prefix="kimi-vault-secrets-",
+                    prefix="nakimi-secrets-",
                     suffix=".json",
                     dir=str(temp_dir)
                 )
@@ -299,7 +299,7 @@ class Vault:
                 using_ram_temp = True
             else:
                 # Fallback to system temp
-                fd, output_path = tempfile.mkstemp(prefix="kimi-vault-secrets-", suffix=".json")
+                fd, output_path = tempfile.mkstemp(prefix="nakimi-secrets-", suffix=".json")
                 os.close(fd)
                 output_path = Path(output_path)
         else:

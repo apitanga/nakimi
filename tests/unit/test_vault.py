@@ -7,7 +7,7 @@ from unittest.mock import patch, Mock
 
 import pytest
 
-from kimi_vault.core.vault import Vault, VaultCryptoError, secure_delete
+from nakimi.core.vault import Vault, VaultCryptoError, secure_delete
 
 
 class TestVault:
@@ -16,7 +16,7 @@ class TestVault:
     def test_init_default_paths(self, temp_dir):
         """Test Vault initialization with default paths."""
         vault = Vault()
-        assert vault.vault_dir == Path.home() / ".kimi-vault"
+        assert vault.vault_dir == Path.home() / ".nakimi"
         assert vault.key_file == vault.vault_dir / "key.txt"
         assert vault.key_pub_file == vault.vault_dir / "key.txt.pub"
     
@@ -45,7 +45,7 @@ class TestVault:
     
     def test_generate_key_success(self, temp_dir, patch_age_commands):
         """Test successful key generation."""
-        vault = Vault(vault_dir=temp_dir / ".kimi-vault")
+        vault = Vault(vault_dir=temp_dir / ".nakimi")
         
         # Mock os.chmod to avoid FileNotFoundError
         with patch('os.chmod'):
@@ -56,7 +56,7 @@ class TestVault:
     
     def test_generate_key_already_exists(self, temp_dir):
         """Test key generation when key already exists."""
-        vault = Vault(vault_dir=temp_dir / ".kimi-vault")
+        vault = Vault(vault_dir=temp_dir / ".nakimi")
         vault.key_file.parent.mkdir(parents=True, exist_ok=True)
         vault.key_file.touch()
         
@@ -65,7 +65,7 @@ class TestVault:
     
     def test_get_public_key_from_pub_file(self, temp_dir):
         """Test getting public key from .pub file."""
-        vault = Vault(vault_dir=temp_dir / ".kimi-vault")
+        vault = Vault(vault_dir=temp_dir / ".nakimi")
         vault.vault_dir.mkdir(parents=True, exist_ok=True)
         
         # Create .pub file
@@ -77,7 +77,7 @@ class TestVault:
     
     def test_get_public_key_from_private_key(self, temp_dir):
         """Test deriving public key from private key file."""
-        vault = Vault(vault_dir=temp_dir / ".kimi-vault")
+        vault = Vault(vault_dir=temp_dir / ".nakimi")
         vault.vault_dir.mkdir(parents=True, exist_ok=True)
         
         # Create private key file with embedded public key
@@ -91,14 +91,14 @@ class TestVault:
     
     def test_get_public_key_not_found(self, temp_dir):
         """Test getting public key when no key files exist."""
-        vault = Vault(vault_dir=temp_dir / ".kimi-vault")
+        vault = Vault(vault_dir=temp_dir / ".nakimi")
         
         with pytest.raises(VaultCryptoError, match="Key file not found"):
             vault.get_public_key()
     
     def test_encrypt_success(self, temp_dir, patch_age_commands):
         """Test successful file encryption."""
-        vault = Vault(vault_dir=temp_dir / ".kimi-vault")
+        vault = Vault(vault_dir=temp_dir / ".nakimi")
         vault.vault_dir.mkdir(parents=True, exist_ok=True)
         
         # Create test file
@@ -119,14 +119,14 @@ class TestVault:
     
     def test_encrypt_input_not_found(self, temp_dir):
         """Test encryption when input file doesn't exist."""
-        vault = Vault(vault_dir=temp_dir / ".kimi-vault")
+        vault = Vault(vault_dir=temp_dir / ".nakimi")
         
         with pytest.raises(VaultCryptoError, match="Input file not found"):
             vault.encrypt(temp_dir / "nonexistent.txt")
     
     def test_encrypt_custom_output(self, temp_dir, patch_age_commands):
         """Test encryption with custom output path."""
-        vault = Vault(vault_dir=temp_dir / ".kimi-vault")
+        vault = Vault(vault_dir=temp_dir / ".nakimi")
         vault.vault_dir.mkdir(parents=True, exist_ok=True)
         
         input_file = temp_dir / "test.txt"
@@ -142,7 +142,7 @@ class TestVault:
     
     def test_decrypt_success(self, temp_dir, patch_age_commands):
         """Test successful file decryption."""
-        vault = Vault(vault_dir=temp_dir / ".kimi-vault")
+        vault = Vault(vault_dir=temp_dir / ".nakimi")
         vault.vault_dir.mkdir(parents=True, exist_ok=True)
         
         # Create key file
@@ -157,12 +157,12 @@ class TestVault:
         
         result = vault.decrypt(encrypted_file)
         assert result.exists()
-        assert "kimi-vault-secrets-" in str(result)
+        assert "nakimi-secrets-" in str(result)
         assert result.suffix == ".json"
     
     def test_decrypt_custom_output(self, temp_dir, patch_age_commands):
         """Test decryption with custom output path."""
-        vault = Vault(vault_dir=temp_dir / ".kimi-vault")
+        vault = Vault(vault_dir=temp_dir / ".nakimi")
         vault.vault_dir.mkdir(parents=True, exist_ok=True)
         
         # Create key file
@@ -183,14 +183,14 @@ class TestVault:
     
     def test_decrypt_input_not_found(self, temp_dir):
         """Test decryption when input file doesn't exist."""
-        vault = Vault(vault_dir=temp_dir / ".kimi-vault")
+        vault = Vault(vault_dir=temp_dir / ".nakimi")
         
         with pytest.raises(VaultCryptoError, match="Encrypted file not found"):
             vault.decrypt(temp_dir / "nonexistent.txt.age")
     
     def test_decrypt_key_not_found(self, temp_dir):
         """Test decryption when key file doesn't exist."""
-        vault = Vault(vault_dir=temp_dir / ".kimi-vault")
+        vault = Vault(vault_dir=temp_dir / ".nakimi")
         
         # Create encrypted file
         encrypted_file = temp_dir / "test.txt.age"
@@ -201,7 +201,7 @@ class TestVault:
     
     def test_decrypt_to_string(self, temp_dir, patch_age_commands):
         """Test decryption to string."""
-        vault = Vault(vault_dir=temp_dir / ".kimi-vault")
+        vault = Vault(vault_dir=temp_dir / ".nakimi")
         vault.vault_dir.mkdir(parents=True, exist_ok=True)
         
         # Create key file
@@ -235,7 +235,7 @@ class TestSecureDelete:
         test_file = temp_dir / "nonexistent.txt"
         secure_delete(test_file)  # Should not raise
     
-    @patch('kimi_vault.core.vault.is_ram_disk')
+    @patch('nakimi.core.vault.is_ram_disk')
     @patch('subprocess.run')
     def test_secure_delete_with_shred(self, mock_run, mock_is_ram_disk, temp_dir):
         """Test secure_delete using shred command."""
@@ -257,7 +257,7 @@ class TestSecureDelete:
             check=True
         )
     
-    @patch('kimi_vault.core.vault.is_ram_disk')
+    @patch('nakimi.core.vault.is_ram_disk')
     @patch('subprocess.run', side_effect=FileNotFoundError())
     def test_secure_delete_fallback(self, mock_run, mock_is_ram_disk, temp_dir):
         """Test secure_delete falls back to unlink when shred not found."""
@@ -271,7 +271,7 @@ class TestSecureDelete:
         secure_delete(test_file)
         assert not test_file.exists()
     
-    @patch('kimi_vault.core.vault.is_ram_disk')
+    @patch('nakimi.core.vault.is_ram_disk')
     def test_secure_delete_on_ram_disk(self, mock_is_ram_disk, temp_dir):
         """Test secure_delete skips shred on RAM disk."""
         test_file = temp_dir / "test.txt"

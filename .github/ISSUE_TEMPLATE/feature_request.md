@@ -23,7 +23,7 @@ Describe how you envision the feature working.
 ## Example Usage
 ```bash
 # Show how the feature would be used from CLI
-kimi-vault new-command --option value
+nakimi new-command --option value
 ```
 
 ## Implementation Considerations

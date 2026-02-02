@@ -1,5 +1,5 @@
 """
-Gmail Plugin for Kimi Vault
+Gmail Plugin for Nakimi
 
 Implements the Plugin interface to provide Gmail functionality
 through the vault's plugin system.

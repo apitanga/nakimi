@@ -3,8 +3,8 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "kimi-secrets-vault"
-version = "1.0.0"
+name = "nakimi"
+version = "2.0.0"
 description = "Secure, just-in-time access to API credentials with age encryption"
 readme = "README.md"
 license = {text = "MIT"}
@@ -44,7 +44,7 @@ dev = [
 ]
 
 [project.scripts]
-kimi-vault = "kimi_vault.cli.main:main"
+nakimi = "nakimi.cli.main:main"
 
 [project.urls]
 Homepage = "https://github.com/apitanga/kimi-secrets-vault"
@@ -56,7 +56,7 @@ Issues = "https://github.com/apitanga/kimi-secrets-vault/issues"
 where = ["src"]
 
 [tool.setuptools.package-data]
-kimi_vault = ["py.typed"]
+nakimi = ["py.typed"]
 
 [tool.black]
 line-length = 100

@@ -1,9 +1,9 @@
 """
-Configuration management for Kimi Vault
+Configuration management for Nakimi
 
 Supports configuration via:
-1. Environment variables (KIMI_VAULT_*)
-2. Config file (~/.config/kimi-vault/config or $KIMI_VAULT_CONFIG)
+1. Environment variables (NAKIMI_*)
+2. Config file (~/.config/nakimi/config or $NAKIMI_CONFIG)
 3. Sensible defaults
 """
 
@@ -13,10 +13,10 @@ from typing import Optional
 
 
 class VaultConfig:
-    """Configuration manager for kimi-vault"""
+    """Configuration manager for nakimi"""
     
-    DEFAULT_VAULT_DIR = "~/.kimi-vault"
-    DEFAULT_CONFIG_DIR = "~/.config/kimi-vault"
+    DEFAULT_VAULT_DIR = "~/.nakimi"
+    DEFAULT_CONFIG_DIR = "~/.config/nakimi"
     DEFAULT_CONFIG_FILE = "config"
     
     def __init__(self):
@@ -30,10 +30,10 @@ class VaultConfig:
     def _load_config(self):
         """Load configuration from env vars and/or config file"""
         # Environment variables take precedence
-        self._vault_dir = self._get_path_from_env("KIMI_VAULT_DIR", self.DEFAULT_VAULT_DIR)
-        self._config_dir = self._get_path_from_env("KIMI_VAULT_CONFIG_DIR", self.DEFAULT_CONFIG_DIR)
+        self._vault_dir = self._get_path_from_env("NAKIMI_DIR", self.DEFAULT_VAULT_DIR)
+        self._config_dir = self._get_path_from_env("NAKIMI_CONFIG_DIR", self.DEFAULT_CONFIG_DIR)
         
-        config_file_env = os.environ.get("KIMI_VAULT_CONFIG")
+        config_file_env = os.environ.get("NAKIMI_CONFIG")
         if config_file_env:
             self._config_file = Path(config_file_env).expanduser()
         else:
@@ -44,13 +44,13 @@ class VaultConfig:
         
         # Set paths (env var > config file > default)
         self._key_file = self._get_path(
-            "KIMI_VAULT_KEY",
+            "NAKIMI_KEY",
             config_values.get("key_file"),
             self._vault_dir / "key.txt"
         )
         
         self._secrets_file = self._get_path(
-            "KIMI_VAULT_SECRETS",
+            "NAKIMI_SECRETS",
             config_values.get("secrets_file"),
             self._vault_dir / "secrets.json.age"
         )

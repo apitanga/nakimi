@@ -4,7 +4,7 @@ Unit tests for plugin.py - Plugin base classes.
 import pytest
 from unittest.mock import Mock, patch
 
-from kimi_vault.core.plugin import Plugin, PluginCommand, PluginError, PluginManager
+from nakimi.core.plugin import Plugin, PluginCommand, PluginError, PluginManager
 
 
 class TestPluginCommand:

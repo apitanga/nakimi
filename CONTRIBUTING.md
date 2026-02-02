@@ -1,10 +1,10 @@
-# Contributing to Kimi Secrets Vault
+# Contributing to Nakimi
 
-Thank you for your interest in contributing to Kimi Secrets Vault! This document provides guidelines and instructions for contributing to the project.
+Thank you for your interest in contributing to Nakimi! This document provides guidelines and instructions for contributing to the project.
 
 ## Our Philosophy
 
-Kimi Secrets Vault follows these core principles:
+Nakimi follows these core principles:
 
 1. **Security First**: Never compromise security for convenience
 2. **Local-First Architecture**: User data stays on their machine unless explicitly shared
@@ -23,8 +23,8 @@ Kimi Secrets Vault follows these core principles:
 
 1. **Fork and clone the repository**:
    ```bash
-   git clone https://github.com/your-username/kimi-secrets-vault.git
-   cd kimi-secrets-vault
+   git clone https://github.com/your-username/nakimi.git
+   cd nakimi
    ```
 
 2. **Set up virtual environment**:
@@ -80,7 +80,7 @@ Example: `feature/github-plugin`, `bugfix/cli-error-handling`
 
 Run the full test suite:
 ```bash
-python -m pytest tests/ --cov=src/kimi_vault --cov-report=term-missing
+python -m pytest tests/ --cov=src/nakimi --cov-report=term-missing
 ```
 
 Run specific test files:
@@ -115,7 +115,7 @@ These hooks help maintain code quality. You can skip them temporarily with `--no
 ## Contributing Areas
 
 ### 1. Plugin Development
-Plugins are the primary way to extend Kimi Secrets Vault. See [Plugin Development Guide](docs/development/PLUGIN_DEVELOPMENT.md) for detailed guidelines.
+Plugins are the primary way to extend Nakimi. See [Plugin Development Guide](docs/development/PLUGIN_DEVELOPMENT.md) for detailed guidelines.
 
 #### Plugin Requirements:
 - Must inherit from `BasePlugin` class
@@ -242,6 +242,6 @@ We follow [Semantic Versioning](https://semver.org/):
 
 ---
 
-Thank you for contributing to making Kimi Secrets Vault more secure, useful, and accessible to developers worldwide!
+Thank you for contributing to making Nakimi more secure, useful, and accessible to developers worldwide!
 
 *Last updated: 2026-02-01*

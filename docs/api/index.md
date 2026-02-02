@@ -7,16 +7,16 @@ nav_order: 90
 
 ## Overview
 
-Kimi Secrets Vault provides both a CLI and a Python API for programmatic access. This document covers the Python API for plugin development and integration.
+Nakimi provides both a CLI and a Python API for programmatic access. This document covers the Python API for plugin development and integration.
 
 ## Core Modules
 
-### `kimi_vault.core`
+### `nakimi.core`
 
 The core module provides vault management and configuration.
 
 ```python
-from kimi_vault.core import Vault, get_config, secure_delete
+from nakimi.core import Vault, get_config, secure_delete
 ```
 
 #### `Vault` Class
@@ -71,7 +71,7 @@ def get_config() -> Config:
     
     Reads from (in order):
     1. Environment variables
-    2. Config file (~/.config/kimi-vault/config)
+    2. Config file (~/.config/nakimi/config)
     3. Default values
     
     Returns:
@@ -96,12 +96,12 @@ def secure_delete(path: str) -> None:
     """
 ```
 
-### `kimi_vault.core.plugin`
+### `nakimi.core.plugin`
 
 Plugin base classes and utilities.
 
 ```python
-from kimi_vault.core.plugin import Plugin, PluginCommand, PluginError
+from nakimi.core.plugin import Plugin, PluginCommand, PluginError
 ```
 
 #### `Plugin` Abstract Base Class
@@ -159,8 +159,8 @@ class PluginError(Exception):
 ### Complete Plugin Implementation
 
 ```python
-# src/kimi_vault/plugins/example/plugin.py
-from kimi_vault.core.plugin import Plugin, PluginCommand, PluginError
+# src/nakimi/plugins/example/plugin.py
+from nakimi.core.plugin import Plugin, PluginCommand, PluginError
 
 class ExamplePlugin(Plugin):
     @property
@@ -219,7 +219,7 @@ Plugins are auto-discovered via Python's entry point system. No manual registrat
 
 **Requirements**:
 1. Plugin class must be in `plugin.py` file
-2. Located in `src/kimi_vault/plugins/<plugin_name>/`
+2. Located in `src/nakimi/plugins/<plugin_name>/`
 3. Class name must be `<PluginName>Plugin` (e.g., `ExamplePlugin`)
 
 ## Using Plugins Programmatically
@@ -227,8 +227,8 @@ Plugins are auto-discovered via Python's entry point system. No manual registrat
 ### Direct Plugin Instantiation
 
 ```python
-from kimi_vault.core import Vault, get_config
-from kimi_vault.plugins.gmail.plugin import GmailPlugin
+from nakimi.core import Vault, get_config
+from nakimi.plugins.gmail.plugin import GmailPlugin
 
 # Load secrets
 config = get_config()
@@ -259,7 +259,7 @@ secure_delete(temp_path)
 For advanced use cases, use the plugin manager directly:
 
 ```python
-from kimi_vault.core.plugin_manager import PluginManager
+from nakimi.core.plugin_manager import PluginManager
 
 manager = PluginManager()
 manager.load_plugins(secrets)  # secrets dict from vault
@@ -279,10 +279,10 @@ print(result)
 Plugins automatically get CLI commands via the pattern:
 
 ```
-kimi-vault <plugin_name>.<command_name> [args]
+nakimi <plugin_name>.<command_name> [args]
 ```
 
-Example: `kimi-vault example.fetch 123`
+Example: `nakimi example.fetch 123`
 
 ### Custom Argument Parsing
 
@@ -300,7 +300,7 @@ def cmd_search(self, query: str, limit: str = "10") -> str:
 ### Programmatic Sessions
 
 ```python
-from kimi_vault.core.session import Session
+from nakimi.core.session import Session
 
 with Session() as session:
     # session.decrypted_path available
@@ -315,7 +315,7 @@ with Session() as session:
 ### Common Exceptions
 
 ```python
-from kimi_vault.core.exceptions import (
+from nakimi.core.exceptions import (
     DecryptionError,      # Age decryption failed
     EncryptionError,      # Age encryption failed
     ConfigError,          # Configuration problem
@@ -346,23 +346,23 @@ def cmd_send_email(self, to: str, subject: str, body: str) -> str:
 
 ```python
 import os
-os.environ['KIMI_VAULT_DIR'] = '/custom/path'
-os.environ['KIMI_VAULT_KEY'] = '/custom/key.txt'
+os.environ['NAKIMI_DIR'] = '/custom/path'
+os.environ['NAKIMI_KEY'] = '/custom/key.txt'
 
 # Reload config
-from kimi_vault.core import reload_config
+from nakimi.core import reload_config
 config = reload_config()
 ```
 
 ### Config File
 
 ```python
-from kimi_vault.core.config import write_config
+from nakimi.core.config import write_config
 
 write_config({
-    'vault_dir': '~/.kimi-vault',
-    'key_file': '~/.kimi-vault/key.txt',
-    'secrets_file': '~/.kimi-vault/secrets.json.age',
+    'vault_dir': '~/.nakimi',
+    'key_file': '~/.nakimi/key.txt',
+    'secrets_file': '~/.nakimi/secrets.json.age',
 })
 ```
 
@@ -371,8 +371,8 @@ write_config({
 ### Plugin Testing
 
 ```python
-from kimi_vault.core.plugin import Plugin
-from kimi_vault.core.config import Config
+from nakimi.core.plugin import Plugin
+from nakimi.core.config import Config
 
 class TestPlugin(Plugin):
     # ... implementation
@@ -398,13 +398,13 @@ def test_plugin():
 
 ```python
 from unittest.mock import patch, Mock
-from kimi_vault.core import Vault
+from nakimi.core import Vault
 
 def test_with_mock_vault():
     mock_vault = Mock(spec=Vault)
     mock_vault.decrypt.return_value = '/tmp/test.json'
     
-    with patch('kimi_vault.core.Vault', return_value=mock_vault):
+    with patch('nakimi.core.Vault', return_value=mock_vault):
         # Test code that uses vault
         pass
 ```
@@ -447,8 +447,8 @@ Large secrets may impact memory usage. Consider:
 
 See the existing plugins for real-world examples:
 
-- `src/kimi_vault/plugins/gmail/` - Gmail API integration
-- `src/kimi_vault/plugins/calendar/` - Google Calendar integration (planned)
+- `src/nakimi/plugins/gmail/` - Gmail API integration
+- `src/nakimi/plugins/calendar/` - Google Calendar integration (planned)
 
 ## Further Reading
 

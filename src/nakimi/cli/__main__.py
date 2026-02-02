@@ -1,4 +1,4 @@
-"""Entry point for python -m kimi_vault.cli"""
+"""Entry point for python -m nakimi.cli"""
 import sys
 import io
 

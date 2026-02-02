@@ -1,5 +1,5 @@
 """
-Kimi Secrets Vault - Secure, just-in-time access to API credentials
+Nakimi - Secure, just-in-time access to API credentials
 
 A plugin-based vault for managing API credentials with age encryption.
 """

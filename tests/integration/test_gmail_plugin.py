@@ -4,8 +4,8 @@ Integration tests for Gmail plugin (mocked).
 import pytest
 from unittest.mock import Mock, patch
 
-from kimi_vault.plugins.gmail.plugin import GmailPlugin, PluginError
-from kimi_vault.plugins.gmail.client import GmailClient, GmailAuthError
+from nakimi.plugins.gmail.plugin import GmailPlugin, PluginError
+from nakimi.plugins.gmail.client import GmailClient, GmailAuthError
 
 
 class TestGmailPlugin:
@@ -132,7 +132,7 @@ class TestGmailPlugin:
         plugin = GmailPlugin(mock_secrets["gmail"])
         
         # Mock GmailClient to raise auth error
-        with patch('kimi_vault.plugins.gmail.plugin.GmailClient', 
+        with patch('nakimi.plugins.gmail.plugin.GmailClient', 
                          side_effect=GmailAuthError("Invalid credentials")):
             with pytest.raises(PluginError, match="Failed to initialize Gmail"):
                 plugin._get_client()

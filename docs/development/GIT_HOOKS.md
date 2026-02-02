@@ -102,7 +102,7 @@ Edit `.git/hooks/pre-push` and change the test command:
 TEST_OUTPUT=$(python -m pytest tests/ -v 2>&1)
 
 # Change to add coverage:
-TEST_OUTPUT=$(python -m pytest tests/ --cov=src/kimi_vault -v 2>&1)
+TEST_OUTPUT=$(python -m pytest tests/ --cov=src/nakimi -v 2>&1)
 ```
 
 ### Add linting to pre-commit:

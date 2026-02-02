@@ -6,7 +6,7 @@ parent: Development
 
 # Testing Guide
 
-Complete guide to testing kimi-secrets-vault, including architecture, patterns, and lessons learned.
+Complete guide to testing nakimi, including architecture, patterns, and lessons learned.
 
 ---
 
@@ -56,7 +56,7 @@ tests/
 python -m pytest tests/ -v
 
 # Run with coverage
-python -m pytest tests/ --cov=src/kimi_vault
+python -m pytest tests/ --cov=src/nakimi
 
 # Run specific test file
 python -m pytest tests/unit/test_vault.py -v
@@ -132,12 +132,12 @@ import sys
 from unittest.mock import patch
 
 # Pattern: Patch sys.argv for CLI arguments
-with patch('sys.argv', ['kimi-vault', 'encrypt', 'input.txt']):
-    from kimi_vault.cli.main import main
+with patch('sys.argv', ['nakimi', 'encrypt', 'input.txt']):
+    from nakimi.cli.main import main
     main()
 
 # Pattern: Mock command execution
-with patch('sys.argv', ['kimi-vault', 'gmail.unread']):
+with patch('sys.argv', ['nakimi', 'gmail.unread']):
     with patch.object(plugin, 'cmd_unread') as mock_cmd:
         mock_cmd.return_value = "5 unread emails"
         main()
@@ -147,7 +147,7 @@ with patch('sys.argv', ['kimi-vault', 'gmail.unread']):
 #### 4. Error Handling
 
 ```python
-from kimi_vault.core.plugin import PluginError
+from nakimi.core.plugin import PluginError
 
 # Pattern: Mock exceptions
 mock_plugin_manager.get_plugin.side_effect = PluginError("Plugin not found")
@@ -161,7 +161,7 @@ assert "❌" in captured_output
 
 ```python
 # Pattern: Mock external API clients
-@patch('kimi_vault.plugins.gmail.plugin.GmailClient')
+@patch('nakimi.plugins.gmail.plugin.GmailClient')
 def test_gmail_unread_command(mock_client_class):
     mock_client = Mock()
     mock_client.list_unread.return_value = [
@@ -210,8 +210,8 @@ def mock_vault():
 # tests/test_weather_plugin.py
 import pytest
 from unittest.mock import Mock, patch
-from kimi_vault.plugins.weather.plugin import WeatherPlugin
-from kimi_vault.core.plugin import PluginError
+from nakimi.plugins.weather.plugin import WeatherPlugin
+from nakimi.core.plugin import PluginError
 
 def test_weather_plugin_validation():
     """Test credential validation"""
@@ -249,8 +249,8 @@ from pathlib import Path
 
 def test_weather_cli_integration():
     """Test plugin through CLI"""
-    with patch('sys.argv', ['kimi-vault', 'weather.current', 'New York']):
-        with patch('kimi_vault.core.vault.Vault.decrypt') as mock_decrypt:
+    with patch('sys.argv', ['nakimi', 'weather.current', 'New York']):
+        with patch('nakimi.core.vault.Vault.decrypt') as mock_decrypt:
             # Mock vault returning Path object
             mock_path = Mock(spec=Path)
             mock_path.exists.return_value = True
@@ -262,7 +262,7 @@ def test_weather_cli_integration():
                     'weather': {'api_key': 'test'}
                 }):
                     # Run CLI
-                    from kimi_vault.cli.main import main
+                    from nakimi.cli.main import main
                     main()
 ```
 
@@ -396,7 +396,7 @@ To maintain code quality and prevent regressions, git hooks enforce test passing
 
 ```bash
 # Hooks are installed automatically by install.sh
-cd ~/code/kimi-secrets-vault
+cd ~/code/nakimi
 ./install.sh --dev
 
 # Or manually copy from templates
@@ -420,19 +420,19 @@ For development and debugging:
 
 ```bash
 # 1. Install in dev mode
-cd ~/code/kimi-secrets-vault
+cd ~/code/nakimi
 ./install.sh --dev
 
 # 2. Add test credentials
-vim ~/.kimi-vault/secrets.json
+vim ~/.nakimi/secrets.json
 
 # 3. Encrypt
-age -r $(cat ~/.kimi-vault/key.txt.pub) -o ~/.kimi-vault/secrets.json.age ~/.kimi-vault/secrets.json
-shred -u ~/.kimi-vault/secrets.json
+age -r $(cat ~/.nakimi/key.txt.pub) -o ~/.nakimi/secrets.json.age ~/.nakimi/secrets.json
+shred -u ~/.nakimi/secrets.json
 
 # 4. Test commands
-kimi-vault plugins list           # Should show plugins
-kimi-vault <plugin>.<command>     # Test specific command
+nakimi plugins list           # Should show plugins
+nakimi <plugin>.<command>     # Test specific command
 ```
 
 ---
@@ -464,7 +464,7 @@ When adding features, follow this checklist:
 - [ ] Mock all external dependencies
 - [ ] Test error cases and edge cases
 - [ ] Verify tests pass: `python -m pytest tests/ -v`
-- [ ] Check coverage: `python -m pytest tests/ --cov=src/kimi_vault`
+- [ ] Check coverage: `python -m pytest tests/ --cov=src/nakimi`
 - [ ] Run git hooks: `.git/hooks/pre-push`
 
 ---

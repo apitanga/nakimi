@@ -1,5 +1,5 @@
 """
-Main CLI entry point for Kimi Vault
+Main CLI entry point for Nakimi
 
 Provides plugin-based command execution and vault management.
 """
@@ -11,17 +11,17 @@ import subprocess
 import sys
 from pathlib import Path
 
-from kimi_vault.core import Vault, VaultConfig, get_config, secure_delete
-from kimi_vault.core.plugin import PluginManager, PluginError
+from nakimi.core import Vault, VaultConfig, get_config, secure_delete
+from nakimi.core.plugin import PluginManager, PluginError
 
 # Version - sync with pyproject.toml
-__version__ = "1.0.0"
+__version__ = "2.0.0"
 
 
 def get_secrets_path() -> Path:
     """Get secrets file path from env or config"""
-    # Priority: KIMI_VAULT_SECRETS > KIMI_BOT_SECRETS > config default
-    env_path = os.environ.get("KIMI_VAULT_SECRETS") or os.environ.get("KIMI_BOT_SECRETS")
+    # Priority: NAKIMI_SECRETS > NAKIMI_BOT_SECRETS > config default
+    env_path = os.environ.get("NAKIMI_SECRETS") or os.environ.get("NAKIMI_BOT_SECRETS")
     if env_path:
         return Path(env_path)
     
@@ -36,7 +36,7 @@ def load_secrets() -> dict:
     if not secrets_path.exists():
         raise PluginError(
             f"No secrets file found at {secrets_path}\n"
-            "Run 'kimi-vault init' to set up your vault."
+            "Run 'nakimi init' to set up your vault."
         )
     
     # Check if file is encrypted (.age extension)
@@ -172,10 +172,10 @@ def cmd_run(args):
 
 
 def cmd_upgrade(args):
-    """Upgrade kimi-vault to latest version from GitHub"""
+    """Upgrade nakimi to latest version from GitHub"""
     repo_url = "https://github.com/apitanga/kimi-secrets-vault.git"
     
-    print(f"🔄 Upgrading kimi-vault...")
+    print(f"🔄 Upgrading nakimi...")
     print(f"   Repository: {repo_url}")
     if args.target_version:
         print(f"   Target version: {args.target_version}")
@@ -202,7 +202,7 @@ def cmd_upgrade(args):
             print()
             # Show new version
             print("New version:")
-            subprocess.run([sys.executable, "-m", "kimi_vault.cli.main", "--version"])
+            subprocess.run([sys.executable, "-m", "nakimi.cli.main", "--version"])
         else:
             print()
             print(f"❌ Upgrade failed with exit code {result.returncode}")
@@ -214,7 +214,7 @@ def cmd_upgrade(args):
 
 def cmd_version():
     """Show version information"""
-    print(f"kimi-vault {__version__}")
+    print(f"nakimi {__version__}")
     print(f"Python {sys.version.split()[0]}")
     print(f"Location: {Path(__file__).parent.parent.parent}")
 
@@ -230,7 +230,7 @@ def cmd_session(args):
     # Check vault exists
     if not config.secrets_file.exists():
         print(f"❌ No encrypted secrets found at {config.secrets_file}")
-        print("Run 'kimi-vault init' to set up your vault.")
+        print("Run 'nakimi init' to set up your vault.")
         sys.exit(1)
     
     # Decrypt secrets to temp file
@@ -262,8 +262,8 @@ def cmd_session(args):
         pass
     
     print()
-    print("💡 Usage: kimi-vault <plugin>.<command> [args]")
-    print("         Example: kimi-vault gmail.unread")
+    print("💡 Usage: nakimi <plugin>.<command> [args]")
+    print("         Example: nakimi gmail.unread")
     print()
     
     # Set up cleanup
@@ -273,7 +273,7 @@ def cmd_session(args):
             print("\n🔒 Vault closed")
     
     # Export secrets path
-    os.environ["KIMI_VAULT_SECRETS"] = str(temp_secrets)
+    os.environ["NAKIMI_SECRETS"] = str(temp_secrets)
     
     try:
         # Launch shell or kimi
@@ -312,7 +312,7 @@ def main():
             return cmd_run(args)
     
     parser = argparse.ArgumentParser(
-        prog="kimi-vault",
+        prog="nakimi",
         description="Secure vault for API credentials with plugin-based integrations",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
@@ -361,7 +361,7 @@ Examples:
     upgrade_parser = subparsers.add_parser("upgrade", help="Upgrade to latest version from GitHub")
     upgrade_parser.add_argument("--version", dest="target_version", help="Specific version to upgrade to (default: latest)")
     
-    # plugin command (direct invocation: kimi-vault gmail.unread)
+    # plugin command (direct invocation: nakimi gmail.unread)
     # This is handled specially below
     
     args, remaining = parser.parse_known_args()

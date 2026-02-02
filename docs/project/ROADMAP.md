@@ -24,7 +24,7 @@ parent: Project
 ## Q1 2026 Focus: Foundation & Trust
 
 ### Primary Objective
-Establish Kimi Secrets Vault as the most trustworthy credential manager for individual developers through technical excellence, security hardening, and core functionality expansion.
+Establish Nakimi as the most trustworthy credential manager for individual developers through technical excellence, security hardening, and core functionality expansion.
 
 ### Key Focus Areas
 

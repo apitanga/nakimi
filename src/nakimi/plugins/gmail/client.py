@@ -1,5 +1,5 @@
 """
-Gmail client for Kimi Vault
+Gmail client for Nakimi
 
 Handles Gmail API authentication with automatic token refresh
 and provides methods for common email operations.

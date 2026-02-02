@@ -70,7 +70,7 @@ We provide security updates for the following versions:
 - RAM-backed temporary files
 
 ### Threat Model
-Kimi Secrets Vault assumes:
+Nakimi assumes:
 - The user's machine is not compromised
 - The `age` implementation is secure
 - Plugins are from trusted sources

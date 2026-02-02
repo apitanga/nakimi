@@ -6,7 +6,7 @@ parent: Development
 
 # Plugin Development Guide
 
-Creating plugins for kimi-secrets-vault is straightforward. This guide walks through the process.
+Creating plugins for nakimi is straightforward. This guide walks through the process.
 
 ---
 
@@ -14,7 +14,7 @@ Creating plugins for kimi-secrets-vault is straightforward. This guide walks thr
 
 Every plugin needs:
 
-1. **Directory**: `src/kimi_vault/plugins/<name>/`
+1. **Directory**: `src/nakimi/plugins/<name>/`
 2. **`__init__.py`**: Makes it a Python package
 3. **`plugin.py`**: Implements the `Plugin` base class
 4. **(Optional)** **client.py**: Service-specific API client
@@ -26,16 +26,16 @@ Every plugin needs:
 ### 1. Create Directory Structure
 
 ```bash
-mkdir -p src/kimi_vault/plugins/weather
-touch src/kimi_vault/plugins/weather/__init__.py
+mkdir -p src/nakimi/plugins/weather
+touch src/nakimi/plugins/weather/__init__.py
 ```
 
 ### 2. Implement Plugin Class
 
-**File**: `src/kimi_vault/plugins/weather/plugin.py`
+**File**: `src/nakimi/plugins/weather/plugin.py`
 
 ```python
-from kimi_vault.core.plugin import Plugin, PluginCommand, PluginError
+from nakimi.core.plugin import Plugin, PluginCommand, PluginError
 
 class WeatherPlugin(Plugin):
     """Weather API integration"""
@@ -103,12 +103,12 @@ Update `config/secrets.template.json`:
 
 ```bash
 # Add credentials to vault
-vim ~/.kimi-vault/secrets.json  # Add weather credentials
-age -r $(cat ~/.kimi-vault/key.txt.pub) -o ~/.kimi-vault/secrets.json.age ~/.kimi-vault/secrets.json
-shred -u ~/.kimi-vault/secrets.json
+vim ~/.nakimi/secrets.json  # Add weather credentials
+age -r $(cat ~/.nakimi/key.txt.pub) -o ~/.nakimi/secrets.json.age ~/.nakimi/secrets.json
+shred -u ~/.nakimi/secrets.json
 
 # Use the plugin
-kimi-vault weather.current "New York"
+nakimi weather.current "New York"
 ```
 
 ---
@@ -165,16 +165,16 @@ def cmd_<name>(self, *args) -> str:
 
 Plugins are auto-discovered based on:
 
-1. **Location**: Must be in `src/kimi_vault/plugins/<name>/`
+1. **Location**: Must be in `src/nakimi/plugins/<name>/`
 2. **Credentials**: Must have matching key in `secrets.json`
-3. **Import**: Must be importable as `kimi_vault.plugins.<name>.plugin.<Name>Plugin`
+3. **Import**: Must be importable as `nakimi.plugins.<name>.plugin.<Name>Plugin`
 
 **Example**:
-- Plugin location: `src/kimi_vault/plugins/github/`
-- Class: `GithubPlugin` in `src/kimi_vault/plugins/github/plugin.py`
+- Plugin location: `src/nakimi/plugins/github/`
+- Class: `GithubPlugin` in `src/nakimi/plugins/github/plugin.py`
 - Credentials: `secrets.json` contains `"github": { ... }`
 
-**Result**: Plugin auto-loads when `kimi-vault` CLI starts.
+**Result**: Plugin auto-loads when `nakimi` CLI starts.
 
 ---
 
@@ -184,7 +184,7 @@ For complex APIs, separate the API client from the plugin.
 
 ### Example: Gmail Plugin Structure
 
-**File**: `src/kimi_vault/plugins/gmail/client.py`
+**File**: `src/nakimi/plugins/gmail/client.py`
 
 ```python
 from google.auth.transport.requests import Request
@@ -226,10 +226,10 @@ class GmailClient:
         # ... process and return
 ```
 
-**File**: `src/kimi_vault/plugins/gmail/plugin.py`
+**File**: `src/nakimi/plugins/gmail/plugin.py`
 
 ```python
-from kimi_vault.core.plugin import Plugin, PluginCommand
+from nakimi.core.plugin import Plugin, PluginCommand
 from .client import GmailClient
 
 class GmailPlugin(Plugin):
@@ -274,7 +274,7 @@ class GmailPlugin(Plugin):
 Use `PluginError` for validation and execution errors:
 
 ```python
-from kimi_vault.core.plugin import PluginError
+from nakimi.core.plugin import PluginError
 
 def cmd_send(self, to: str, subject: str, body: str) -> str:
     if not to:
@@ -319,8 +319,8 @@ Quick reference for plugin testing:
 # tests/test_weather_plugin.py
 import pytest
 from unittest.mock import Mock, patch
-from kimi_vault.plugins.weather.plugin import WeatherPlugin
-from kimi_vault.core.plugin import PluginError
+from nakimi.plugins.weather.plugin import WeatherPlugin
+from nakimi.core.plugin import PluginError
 
 def test_weather_plugin_validation():
     """Test credential validation"""
@@ -437,8 +437,8 @@ Here are some plugin ideas to get you started:
 
 If you create a useful plugin, consider contributing it back:
 
-1. Fork https://github.com/apitanga/kimi-secrets-vault
-2. Create plugin in `src/kimi_vault/plugins/<name>/`
+1. Fork https://github.com/apitanga/nakimi
+2. Create plugin in `src/nakimi/plugins/<name>/`
 3. Add documentation in `docs/<NAME>_SETUP.md`
 4. Update `config/secrets.template.json`
 5. Add tests in `tests/test_<name>_plugin.py`

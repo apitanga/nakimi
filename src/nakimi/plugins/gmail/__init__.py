@@ -1,4 +1,4 @@
-"""Gmail plugin for Kimi Vault"""
+"""Gmail plugin for Nakimi"""
 
 from .plugin import GmailPlugin
 from .client import GmailClient, GmailAuthError

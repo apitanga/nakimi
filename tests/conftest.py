@@ -1,5 +1,5 @@
 """
-Pytest fixtures for Kimi Vault tests.
+Pytest fixtures for Nakimi tests.
 """
 import json
 import tempfile
@@ -8,8 +8,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from kimi_vault.core.config import VaultConfig, get_config, reset_config
-from kimi_vault.core.vault import Vault
+from nakimi.core.config import VaultConfig, get_config, reset_config
+from nakimi.core.vault import Vault
 
 
 @pytest.fixture
@@ -27,9 +27,9 @@ def test_config(temp_dir):
     
     # Create config with environment variables
     import os
-    os.environ["KIMI_VAULT_DIR"] = str(temp_dir / ".kimi-vault")
-    os.environ["KIMI_VAULT_KEY"] = str(temp_dir / ".kimi-vault" / "key.txt")
-    os.environ["KIMI_VAULT_SECRETS"] = str(temp_dir / ".kimi-vault" / "secrets.json.age")
+    os.environ["NAKIMI_DIR"] = str(temp_dir / ".nakimi")
+    os.environ["NAKIMI_KEY"] = str(temp_dir / ".nakimi" / "key.txt")
+    os.environ["NAKIMI_SECRETS"] = str(temp_dir / ".nakimi" / "secrets.json.age")
     
     config = get_config()
     return config
@@ -65,7 +65,7 @@ def mock_secrets_file(temp_dir, mock_secrets):
 @pytest.fixture
 def mock_vault(temp_dir):
     """Create a mock vault with test key."""
-    vault_dir = temp_dir / ".kimi-vault"
+    vault_dir = temp_dir / ".nakimi"
     vault_dir.mkdir(parents=True, exist_ok=True)
     
     # Create a mock key file (age format)
