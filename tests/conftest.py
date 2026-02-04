@@ -1,6 +1,7 @@
 """
 Pytest fixtures for Nakimi tests.
 """
+
 import json
 import tempfile
 from pathlib import Path
@@ -8,7 +9,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from nakimi.core.config import VaultConfig, get_config, reset_config
+from nakimi.core.config import get_config, reset_config
 from nakimi.core.vault import Vault
 
 
@@ -24,13 +25,14 @@ def test_config(temp_dir):
     """Create a test configuration."""
     # Reset global config first
     reset_config()
-    
+
     # Create config with environment variables
     import os
+
     os.environ["NAKIMI_DIR"] = str(temp_dir / ".nakimi")
     os.environ["NAKIMI_KEY"] = str(temp_dir / ".nakimi" / "key.txt")
     os.environ["NAKIMI_SECRETS"] = str(temp_dir / ".nakimi" / "secrets.json.age")
-    
+
     config = get_config()
     return config
 
@@ -42,11 +44,9 @@ def mock_secrets():
         "gmail": {
             "client_id": "test-client-id",
             "client_secret": "test-client-secret",
-            "refresh_token": "test-refresh-token"
+            "refresh_token": "test-refresh-token",
         },
-        "github": {
-            "api_key": "test-api-key"
-        }
+        "github": {"api_key": "test-api-key"},
     }
 
 
@@ -55,10 +55,10 @@ def mock_secrets_file(temp_dir, mock_secrets):
     """Create a mock secrets JSON file."""
     secrets_file = temp_dir / "secrets.json"
     secrets_file.parent.mkdir(parents=True, exist_ok=True)
-    
-    with open(secrets_file, 'w') as f:
+
+    with open(secrets_file, "w") as f:
         json.dump(mock_secrets, f)
-    
+
     return secrets_file
 
 
@@ -67,19 +67,19 @@ def mock_vault(temp_dir):
     """Create a mock vault with test key."""
     vault_dir = temp_dir / ".nakimi"
     vault_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # Create a mock key file (age format)
     key_file = vault_dir / "key.txt"
-    with open(key_file, 'w') as f:
+    with open(key_file, "w") as f:
         f.write("# created: 2026-01-01T00:00:00Z\n")
         f.write("# public key: age1testpublickey1234567890\n")
         f.write("AGE-SECRET-KEY-1TESTPRIVATEKEY1234567890\n")
-    
+
     # Create .pub file
     pub_file = vault_dir / "key.txt.pub"
-    with open(pub_file, 'w') as f:
+    with open(pub_file, "w") as f:
         f.write("age1testpublickey1234567890\n")
-    
+
     return Vault(key_file=key_file, vault_dir=vault_dir)
 
 
@@ -92,7 +92,7 @@ def mock_gmail_client():
             "subject": "Test Email 1",
             "from": "test1@example.com",
             "date": "2026-01-01T00:00:00Z",
-            "snippet": "Test snippet 1"
+            "snippet": "Test snippet 1",
         }
     ]
     mock.list_recent.return_value = [
@@ -100,7 +100,7 @@ def mock_gmail_client():
             "subject": "Recent Email",
             "from": "recent@example.com",
             "date": "2026-01-01T00:00:00Z",
-            "snippet": "Recent snippet"
+            "snippet": "Recent snippet",
         }
     ]
     mock.list_inbox.return_value = [
@@ -108,7 +108,7 @@ def mock_gmail_client():
             "subject": "Inbox Email",
             "from": "inbox@example.com",
             "date": "2026-01-01T00:00:00Z",
-            "snippet": "Inbox snippet"
+            "snippet": "Inbox snippet",
         }
     ]
     mock.search.return_value = [
@@ -116,42 +116,39 @@ def mock_gmail_client():
             "subject": "Search Result",
             "from": "search@example.com",
             "date": "2026-01-01T00:00:00Z",
-            "snippet": "Search snippet"
+            "snippet": "Search snippet",
         }
     ]
-    mock.list_labels.return_value = [
-        {"name": "INBOX"},
-        {"name": "SENT"}
-    ]
+    mock.list_labels.return_value = [{"name": "INBOX"}, {"name": "SENT"}]
     mock.get_profile.return_value = {
         "emailAddress": "test@example.com",
         "messagesTotal": 100,
-        "threadsTotal": 50
+        "threadsTotal": 50,
     }
     mock.create_draft.return_value = {"id": "draft123"}
     mock.send.return_value = {"id": "msg123"}
-    
+
     return mock
 
 
 @pytest.fixture
 def patch_age_commands():
     """Patch age commands to avoid actual encryption in unit tests."""
-    with patch('subprocess.run') as mock_run:
+    with patch("subprocess.run") as mock_run:
         # Mock age-keygen
         def side_effect(cmd, *args, **kwargs):
-            if 'age-keygen' in cmd:
+            if "age-keygen" in cmd:
                 # Simulate successful key generation
                 mock_result = Mock()
                 mock_result.returncode = 0
                 mock_result.stderr = "# public key: age1testpublickey1234567890\n"
                 return mock_result
-            elif 'age' in cmd and '-r' in cmd:
+            elif "age" in cmd and "-r" in cmd:
                 # Mock encryption
                 mock_result = Mock()
                 mock_result.returncode = 0
                 return mock_result
-            elif 'age' in cmd and '-d' in cmd:
+            elif "age" in cmd and "-d" in cmd:
                 # Mock decryption
                 mock_result = Mock()
                 mock_result.returncode = 0
@@ -162,6 +159,6 @@ def patch_age_commands():
                 mock_result = Mock()
                 mock_result.returncode = 0
                 return mock_result
-        
+
         mock_run.side_effect = side_effect
         yield mock_run
