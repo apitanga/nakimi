@@ -11,6 +11,7 @@ parent: Getting Started
 - Python 3.9 or higher
 - `age` encryption tool
 - (Optional) Google Cloud account for Gmail plugin
+- (Optional) YubiKey hardware support requires `age-plugin-yubikey` binary and YubiKey 4/5 series (see [YubiKey Integration Guide](../security/yubikey.md))
 
 ## Step 1: Install age
 
@@ -268,6 +269,7 @@ pip install google-auth google-auth-oauthlib google-api-python-client
 ## Next Steps
 
 - Read [Gmail Plugin Setup](../plugins/GMAIL_SETUP.md) to set up Gmail API access
+- Add hardware security with [YubiKey Integration](../security/yubikey.md)
 - Learn how to [create custom plugins](../development/PLUGIN_DEVELOPMENT.md)
 - Review the [Architecture](../development/ARCHITECTURE.md) to understand the system design
 - Check [Testing Guide](../development/TESTS.md) for development practices

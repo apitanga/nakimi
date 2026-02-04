@@ -12,6 +12,8 @@ A secure vault that stores your API credentials encrypted at rest, decrypts them
 
 **Key feature**: Plugin-based architecture. Each service (Gmail, Calendar, GitHub, etc.) is a separate plugin that auto-loads when you add credentials.
 
+**Optional YubiKey support**: Hardware-based encryption for age private keys requiring physical presence and PIN authentication.
+
 ## Who Is This For?
 
 | ✅ This Tool Is For | ❌ This Tool Is NOT For |
@@ -429,6 +431,7 @@ class CustomPlugin(Plugin):
 ## Security
 
 - **Encryption**: [age](https://age-encryption.org) - modern, auditable, simple
+- **Hardware security**: Optional [YubiKey](https://www.yubico.com) PIV support via `age-plugin-yubikey` (requires physical key + PIN)
 - **Key storage**: Private key never leaves your machine
 - **At-rest**: All secrets encrypted
 - **In-use**: Decrypted to temp files with strict permissions (0600)
@@ -478,6 +481,17 @@ See [Git Hooks Documentation](docs/development/GIT_HOOKS.md) for detailed docume
 - Python 3.9+
 - [age](https://age-encryption.org) encryption tool
 - API credentials for services you want to use
+- **Optional hardware security**: [YubiKey](https://www.yubico.com) PIV support via `age-plugin-yubikey` (requires separate installation)
+
+### Optional Hardware Security
+
+For enhanced security, Nakimi supports hardware-based encryption using YubiKey PIV slots via the [`age-plugin-yubikey`](https://github.com/str4d/age-plugin-yubikey) plugin. This requires:
+
+- YubiKey 4/5 series with PIV support
+- `age-plugin-yubikey` binary installed (see [YubiKey documentation](docs/security/yubikey.md))
+- Configuration via environment variables or config file
+
+See the [YubiKey Integration Guide](docs/security/yubikey.md) for detailed setup instructions.
 
 ## Installation & Upgrading
 

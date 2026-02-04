@@ -2,6 +2,8 @@
 Core vault operations - encryption/decryption with age
 """
 
+import contextlib
+import logging
 import subprocess
 import tempfile
 import os
@@ -10,6 +12,14 @@ import ctypes
 import mmap
 from pathlib import Path
 from typing import Optional, Union
+
+# Optional YubiKey support
+try:
+    from .yubikey import YubiKeyManager
+    YUBIKEY_AVAILABLE = True
+except ImportError:
+    YUBIKEY_AVAILABLE = False
+    YubiKeyManager = None
 
 
 class VaultCryptoError(Exception):
@@ -143,6 +153,7 @@ class Vault:
         # Load config for defaults
         from .config import get_config
         config = get_config()
+        self.config = config
         
         # Determine vault_dir
         if vault_dir is not None:
@@ -168,6 +179,111 @@ class Vault:
         self.vault_dir = vault_dir if vault_dir else Path.home() / ".nakimi"
         self.key_file = key_file if key_file else self.vault_dir / "key.txt"
         self.key_pub_file = Path(str(self.key_file) + ".pub")
+        
+        # Initialize YubiKey manager if available and enabled
+        self.yubikey_manager = None
+        if YUBIKEY_AVAILABLE and config.yubikey_enabled:
+            try:
+                self.yubikey_manager = YubiKeyManager(config)
+                # Check if YubiKey is actually available (hardware present)
+                if not self.yubikey_manager.is_available():
+                    self.yubikey_manager = None
+                    logger = logging.getLogger(__name__)
+                    logger.debug("YubiKey enabled in config but not available")
+            except Exception as e:
+                logger = logging.getLogger(__name__)
+                logger.warning(f"Failed to initialize YubiKey manager: {e}")
+                self.yubikey_manager = None
+    
+    def _get_decrypted_key_path(self) -> Path:
+        """
+        Get path to decrypted age private key file.
+        
+        If YubiKey is enabled and key file is encrypted with YubiKey,
+        decrypts it to a secure temporary file. Otherwise returns
+        the original key file path.
+        
+        Returns:
+            Path to key file that age can read
+        
+        Raises:
+            VaultCryptoError if decryption fails
+        """
+        # Check if key file exists
+        if not self.key_file.exists():
+            raise VaultCryptoError(f"Private key not found: {self.key_file}")
+        
+        if not self.yubikey_manager:
+            # No YubiKey manager - assume key file is plaintext
+            return self.key_file
+        
+        # Read key file content
+        with open(self.key_file, 'rb') as f:
+            key_data = f.read()
+        
+        # Try to parse as age key (look for AGE-SECRET-KEY- prefix)
+        # If parsing fails, assume it's encrypted with YubiKey
+        try:
+            key_text = key_data.decode('utf-8')
+            if 'AGE-SECRET-KEY-' in key_text:
+                # Already plaintext age key
+                return self.key_file
+        except UnicodeDecodeError:
+            # Binary data - likely encrypted
+            pass
+        
+        # Decrypt with YubiKey
+        try:
+            decrypted_key = self.yubikey_manager.decrypt_age_key(key_data)
+        except Exception as e:
+            raise VaultCryptoError(f"YubiKey decryption failed: {e}")
+        
+        # Create secure temporary file for decrypted key
+        temp_dir = get_secure_temp_dir()
+        if temp_dir:
+            fd, temp_path = tempfile.mkstemp(
+                prefix="nakimi-key-",
+                suffix=".txt",
+                dir=str(temp_dir)
+            )
+        else:
+            fd, temp_path = tempfile.mkstemp(prefix="nakimi-key-", suffix=".txt")
+        os.close(fd)
+        temp_path = Path(temp_path)
+        
+        # Write decrypted key
+        with open(temp_path, 'w') as f:
+            f.write(decrypted_key)
+        
+        # Secure permissions
+        os.chmod(temp_path, 0o600)
+        
+        # Try to lock in memory
+        if temp_dir and can_mlock():
+            mlock_file(temp_path)
+        
+        # Store reference for cleanup (could use atexit or context manager)
+        # For now, caller must handle cleanup
+        return temp_path
+    
+    @contextlib.contextmanager
+    def _with_decrypted_key(self):
+        """
+        Context manager that yields a decrypted key file path.
+        
+        Ensures temporary key files are cleaned up after use.
+        
+        Yields:
+            Path to decrypted key file
+        """
+        key_path = self._get_decrypted_key_path()
+        try:
+            yield key_path
+        finally:
+            # Clean up temporary key file if it's not the original key file
+            if key_path != self.key_file and key_path.exists():
+                # Use secure delete if possible
+                secure_delete(key_path)
     
     def _check_age_installed(self):
         """Check if age is installed"""
@@ -304,9 +420,6 @@ class Vault:
         if not input_path.exists():
             raise VaultCryptoError(f"Encrypted file not found: {input_path}")
         
-        if not self.key_file.exists():
-            raise VaultCryptoError(f"Private key not found: {self.key_file}")
-        
         using_ram_temp = False
         
         if plaintext_path is None:
@@ -331,11 +444,12 @@ class Vault:
             output_path = Path(plaintext_path).expanduser()
         
         try:
-            subprocess.run(
-                ["age", "-d", "-i", str(self.key_file), "-o", str(output_path), str(input_path)],
-                capture_output=True,
-                check=True
-            )
+            with self._with_decrypted_key() as key_path:
+                subprocess.run(
+                    ["age", "-d", "-i", str(key_path), "-o", str(output_path), str(input_path)],
+                    capture_output=True,
+                    check=True
+                )
             # Secure the temp file
             os.chmod(output_path, 0o600)
             
@@ -366,11 +480,12 @@ class Vault:
             raise VaultCryptoError(f"Encrypted file not found: {input_path}")
         
         try:
-            result = subprocess.run(
-                ["age", "-d", "-i", str(self.key_file), str(input_path)],
-                capture_output=True,
-                check=True
-            )
+            with self._with_decrypted_key() as key_path:
+                result = subprocess.run(
+                    ["age", "-d", "-i", str(key_path), str(input_path)],
+                    capture_output=True,
+                    check=True
+                )
             return result.stdout.decode('utf-8')
         except subprocess.CalledProcessError as e:
             raise VaultCryptoError(f"Decryption failed: {e.stderr.decode()}")

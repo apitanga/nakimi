@@ -25,6 +25,7 @@ Nakimi is a secure, plugin-based API credential management system for AI assista
 - Age encryption for credential storage
 - RAM-backed temporary files with `mlock()` support
 - Secure deletion with `shred`
+- YubiKey hardware encryption support (optional)
 - Just-in-time decryption
 
 ### 🔌 Plugin-Based

@@ -14,6 +14,16 @@ from pathlib import Path
 from nakimi.core import Vault, VaultConfig, get_config, secure_delete
 from nakimi.core.plugin import PluginManager, PluginError
 
+# Optional YubiKey support
+try:
+    from nakimi.core.yubikey import YubiKeyManager, YubiKeyError, is_wsl2
+    YUBIKEY_AVAILABLE = True
+except ImportError:
+    YUBIKEY_AVAILABLE = False
+    YubiKeyManager = None
+    YubiKeyError = Exception
+    is_wsl2 = lambda: False
+
 # Version - sync with pyproject.toml
 __version__ = "2.0.0"
 
@@ -295,6 +305,198 @@ def cmd_session(args):
         cleanup()
 
 
+def cmd_yubikey(args):
+    """Handle YubiKey commands"""
+    if not YUBIKEY_AVAILABLE:
+        print("❌ YubiKey support not available")
+        print("   Install with: pip install yubikey-manager")
+        sys.exit(1)
+    
+    config = get_config()
+    
+    if not args.yubikey_command:
+        print("❌ No yubikey command specified")
+        print("   Available commands: setup, status, encrypt-key, decrypt-key, verify-pin, change-pin")
+        sys.exit(1)
+    
+    try:
+        yk = YubiKeyManager(config)
+        
+        if args.yubikey_command == "setup":
+            print("🔧 Setting up YubiKey for Nakimi...")
+            
+            # Check if YubiKey is available
+            if not yk.is_available():
+                print("❌ YubiKey not detected")
+                print("   Make sure:")
+                print("   1. ykman CLI is installed (pip install yubikey-manager)")
+                print("   2. YubiKey is inserted")
+                print("   3. You have appropriate permissions")
+                sys.exit(1)
+            
+            # Get slot info
+            try:
+                slot_info = yk.get_slot_info()
+                print(f"✅ YubiKey detected")
+                print(f"   Slot {args.slot}: {slot_info.get('Algorithm', 'Unknown algorithm')}")
+            except YubiKeyError as e:
+                print(f"⚠️  Could not read slot info: {e}")
+                print("   The slot may not be initialized")
+            
+            # Update configuration
+            import os
+            os.environ["NAKIMI_YUBIKEY_ENABLED"] = "true"
+            os.environ["NAKIMI_YUBIKEY_SLOT"] = args.slot
+            os.environ["NAKIMI_YUBIKEY_REQUIRE_TOUCH"] = "false" if args.no_touch else "true"
+            os.environ["NAKIMI_YUBIKEY_PIN_PROMPT"] = "false" if args.no_pin_prompt else "true"
+            
+            print("✅ Configuration updated")
+            print("   YubiKey will be used for age key encryption")
+            print("   Note: age-plugin-yubikey must be installed for encryption/decryption")
+            print()
+            print("⚠️  IMPORTANT: Run 'nakimi yubikey encrypt-key' to encrypt your existing age key")
+            
+        elif args.yubikey_command == "status":
+            print("🔍 Checking YubiKey status...")
+            
+            # Check ykman
+            if not yk._check_ykman_installed():
+                print("❌ ykman CLI not found")
+                print("   Install with: pip install yubikey-manager")
+                sys.exit(1)
+            
+            # Check YubiKey
+            if not yk._check_yubikey_present():
+                print("❌ No YubiKey detected")
+                print("   Make sure YubiKey is inserted")
+                sys.exit(1)
+            
+            print("✅ YubiKey detected")
+            
+            # Check age-plugin-yubikey
+            if not yk._check_age_plugin_installed():
+                print("⚠️  age-plugin-yubikey not found")
+                print("   Install from: https://github.com/str4d/age-plugin-yubikey")
+                if is_wsl2():
+                    print("   For WSL2: Install Windows binary (age-plugin-yubikey.exe)")
+            else:
+                print("✅ age-plugin-yubikey installed")
+            
+            # Check configuration
+            print(f"\n📋 Configuration:")
+            print(f"   Enabled: {config.yubikey_enabled}")
+            print(f"   Slot: {config.yubikey_slot}")
+            print(f"   Require touch: {config.yubikey_require_touch}")
+            print(f"   PIN prompt: {config.yubikey_pin_prompt}")
+            
+            # Try to get slot info
+            try:
+                slot_info = yk.get_slot_info()
+                print(f"\n🔑 Slot {config.yubikey_slot} info:")
+                for key, value in slot_info.items():
+                    print(f"   {key}: {value}")
+            except YubiKeyError as e:
+                print(f"\n⚠️  Could not read slot info: {e}")
+            
+        elif args.yubikey_command == "encrypt-key":
+            print("🔐 Encrypting age key with YubiKey...")
+            
+            vault = Vault()
+            
+            # Check if key exists
+            if not vault.key_file.exists():
+                print(f"❌ Age key not found: {vault.key_file}")
+                print("   Run 'nakimi init' first to generate a key")
+                sys.exit(1)
+            
+            # Read current key
+            with open(vault.key_file, 'r') as f:
+                age_key = f.read()
+            
+            # Encrypt with YubiKey
+            try:
+                encrypted_key = yk.encrypt_age_key(age_key)
+            except Exception as e:
+                print(f"❌ Encryption failed: {e}")
+                sys.exit(1)
+            
+            # Backup original key
+            backup_path = vault.key_file.with_suffix(".txt.backup")
+            import shutil
+            shutil.copy2(vault.key_file, backup_path)
+            print(f"✅ Original key backed up to: {backup_path}")
+            
+            # Write encrypted key
+            with open(vault.key_file, 'wb') as f:
+                f.write(encrypted_key)
+            
+            print(f"✅ Age key encrypted with YubiKey")
+            print(f"   Encrypted key saved to: {vault.key_file}")
+            print(f"   Keep backup safe in case YubiKey is lost")
+            
+        elif args.yubikey_command == "decrypt-key":
+            print("🔓 Testing YubiKey decryption...")
+            
+            vault = Vault()
+            
+            # Check if key exists
+            if not vault.key_file.exists():
+                print(f"❌ Key file not found: {vault.key_file}")
+                sys.exit(1)
+            
+            # Read encrypted key
+            with open(vault.key_file, 'rb') as f:
+                encrypted_key = f.read()
+            
+            # Try to decrypt
+            try:
+                decrypted_key = yk.decrypt_age_key(encrypted_key)
+                print("✅ Decryption successful")
+                print(f"   Key type: {'age' if 'AGE-SECRET-KEY-' in decrypted_key else 'unknown'}")
+                print(f"   Key length: {len(decrypted_key)} chars")
+            except Exception as e:
+                print(f"❌ Decryption failed: {e}")
+                sys.exit(1)
+            
+        elif args.yubikey_command == "verify-pin":
+            print("🔒 Verifying PIN...")
+            
+            if not yk.is_available():
+                print("❌ YubiKey not available")
+                sys.exit(1)
+            
+            if yk.verify_pin(args.pin):
+                print("✅ PIN verified successfully")
+            else:
+                print("❌ PIN verification failed")
+                sys.exit(1)
+            
+        elif args.yubikey_command == "change-pin":
+            print("🔒 Changing PIN...")
+            
+            if not yk.is_available():
+                print("❌ YubiKey not available")
+                sys.exit(1)
+            
+            if yk.change_pin(args.old_pin, args.new_pin):
+                print("✅ PIN changed successfully")
+            else:
+                print("❌ PIN change failed")
+                print("   Make sure old PIN is correct")
+                sys.exit(1)
+            
+        else:
+            print(f"❌ Unknown yubikey command: {args.yubikey_command}")
+            sys.exit(1)
+            
+    except YubiKeyError as e:
+        print(f"❌ YubiKey error: {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        sys.exit(1)
+
+
 def main():
     # Check for plugin command BEFORE setting up argparse
     # This allows plugin commands like "gmail.unread" to work
@@ -323,6 +525,11 @@ Examples:
   %(prog)s gmail.search "from:boss"      # Search emails
   %(prog)s plugins list                  # List available plugins
   %(prog)s upgrade                       # Upgrade to latest version
+  
+YubiKey commands (optional):
+  %(prog)s yubikey setup                 # Initialize YubiKey
+  %(prog)s yubikey status                # Check YubiKey status
+  %(prog)s yubikey encrypt-key           # Encrypt age key with YubiKey
         """
     )
     
@@ -357,6 +564,35 @@ Examples:
     session_parser.add_argument("--shell", action="store_true", help="Start shell instead of kimi")
     session_parser.add_argument("--exec", dest="command", nargs=argparse.REMAINDER, help="Execute command and exit")
     
+    # yubikey command
+    yubikey_parser = subparsers.add_parser("yubikey", help="YubiKey management and operations")
+    yubikey_sub = yubikey_parser.add_subparsers(dest="yubikey_command", help="YubiKey commands")
+    
+    # yubikey setup
+    setup_parser = yubikey_sub.add_parser("setup", help="Initialize YubiKey for use with Nakimi")
+    setup_parser.add_argument("--slot", default="9a", help="PIV slot to use (default: 9a)")
+    setup_parser.add_argument("--no-touch", action="store_true", help="Disable touch requirement")
+    setup_parser.add_argument("--no-pin-prompt", action="store_true", help="Disable PIN prompt")
+    
+    # yubikey status
+    yubikey_sub.add_parser("status", help="Check YubiKey status and configuration")
+    
+    # yubikey encrypt-key
+    encrypt_parser = yubikey_sub.add_parser("encrypt-key", help="Encrypt existing age key with YubiKey")
+    encrypt_parser.add_argument("--slot", default="9a", help="PIV slot to use (default: 9a)")
+    
+    # yubikey decrypt-key (for testing)
+    yubikey_sub.add_parser("decrypt-key", help="Decrypt age key (for testing)")
+    
+    # yubikey verify-pin
+    verify_parser = yubikey_sub.add_parser("verify-pin", help="Verify YubiKey PIN")
+    verify_parser.add_argument("pin", help="PIN to verify")
+    
+    # yubikey change-pin
+    change_parser = yubikey_sub.add_parser("change-pin", help="Change YubiKey PIN")
+    change_parser.add_argument("old_pin", help="Current PIN")
+    change_parser.add_argument("new_pin", help="New PIN")
+    
     # upgrade command
     upgrade_parser = subparsers.add_parser("upgrade", help="Upgrade to latest version from GitHub")
     upgrade_parser.add_argument("--version", dest="target_version", help="Specific version to upgrade to (default: latest)")
@@ -383,6 +619,7 @@ Examples:
         "plugins": cmd_plugins,
         "session": cmd_session,
         "upgrade": cmd_upgrade,
+        "yubikey": cmd_yubikey,
     }
     
     handler = handlers.get(args.cmd)

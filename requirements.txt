@@ -9,3 +9,6 @@ google-api-python-client>=2.0.0
 
 # Note: age encryption tool must be installed separately
 # See: https://age-encryption.org
+
+# Optional YubiKey support (install with: pip install yubikey-manager)
+# yubikey-manager>=5.0.0

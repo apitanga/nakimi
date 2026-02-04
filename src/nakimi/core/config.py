@@ -25,6 +25,10 @@ class VaultConfig:
         self._config_file: Optional[Path] = None
         self._key_file: Optional[Path] = None
         self._secrets_file: Optional[Path] = None
+        self._yubikey_enabled: Optional[bool] = None
+        self._yubikey_slot: Optional[str] = None
+        self._yubikey_require_touch: Optional[bool] = None
+        self._yubikey_pin_prompt: Optional[bool] = None
         self._load_config()
     
     def _load_config(self):
@@ -60,6 +64,28 @@ class VaultConfig:
             config_values.get("secrets_file"),
             self._vault_dir / "secrets.json.age"
         )
+        
+        # YubiKey settings (env var > config file > default)
+        self._yubikey_enabled = self._get_bool(
+            "NAKIMI_YUBIKEY_ENABLED",
+            config_values.get("yubikey_enabled"),
+            False
+        )
+        self._yubikey_slot = self._get_str(
+            "NAKIMI_YUBIKEY_SLOT",
+            config_values.get("yubikey_slot"),
+            "9a"
+        )
+        self._yubikey_require_touch = self._get_bool(
+            "NAKIMI_YUBIKEY_REQUIRE_TOUCH",
+            config_values.get("yubikey_require_touch"),
+            True
+        )
+        self._yubikey_pin_prompt = self._get_bool(
+            "NAKIMI_YUBIKEY_PIN_PROMPT",
+            config_values.get("yubikey_pin_prompt"),
+            True
+        )
     
     def _get_path_from_env(self, env_var: str, default: str) -> Path:
         """Get path from environment variable or use default"""
@@ -72,6 +98,24 @@ class VaultConfig:
             return Path(os.environ[env_var]).expanduser()
         if config_value:
             return Path(config_value).expanduser()
+        return default
+    
+    def _get_bool(self, env_var: str, config_value: Optional[str], default: bool) -> bool:
+        """Get boolean value with priority: env var > config file > default"""
+        env_val = os.environ.get(env_var)
+        if env_val:
+            return env_val.lower() in ('true', 'yes', '1', 'on')
+        if config_value:
+            return config_value.lower() in ('true', 'yes', '1', 'on')
+        return default
+    
+    def _get_str(self, env_var: str, config_value: Optional[str], default: str) -> str:
+        """Get string value with priority: env var > config file > default"""
+        env_val = os.environ.get(env_var)
+        if env_val:
+            return env_val
+        if config_value:
+            return config_value
         return default
     
     def _read_config_file(self) -> dict:
@@ -117,6 +161,26 @@ class VaultConfig:
     def secrets_file(self) -> Path:
         """Path to encrypted secrets file"""
         return self._secrets_file
+    
+    @property
+    def yubikey_enabled(self) -> bool:
+        """Whether YubiKey is enabled"""
+        return self._yubikey_enabled
+    
+    @property
+    def yubikey_slot(self) -> str:
+        """YubiKey slot to use"""
+        return self._yubikey_slot
+    
+    @property
+    def yubikey_require_touch(self) -> bool:
+        """Whether touch is required for YubiKey operations"""
+        return self._yubikey_require_touch
+    
+    @property
+    def yubikey_pin_prompt(self) -> bool:
+        """Whether to prompt for PIN for YubiKey operations"""
+        return self._yubikey_pin_prompt
     
     def ensure_directories(self):
         """Create necessary directories if they don't exist"""

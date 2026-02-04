@@ -27,6 +27,7 @@ Nakimi uses [age](https://age-encryption.org) (Actually Good Encryption) for mod
 - **Just-in-time decryption**: Secrets are decrypted only during active sessions
 - **RAM-backed storage**: Decrypted secrets stay in RAM (`/dev/shm`) and never touch disk
 - **Memory locking**: Uses `mlock()` to prevent swapping to disk
+- **Hardware key support**: Optional [YubiKey](https://www.yubico.com) PIV integration via `age-plugin-yubikey` (requires physical key + PIN)
 - **Secure deletion**: Plaintext files are shredded with `shred` (not just deleted)
 
 ### Key Management
@@ -175,6 +176,7 @@ Nakimi is **NOT** suitable for:
 - [Plugin Development](../development/PLUGIN_DEVELOPMENT.md) - Secure plugin creation
 - [Testing Guide](../development/TESTS.md) - Security testing practices
 - [Security Policy](SECURITY.md) - Vulnerability reporting
+- [YubiKey Integration Guide](yubikey.md) - Hardware-based encryption with YubiKey
 
 ---
 

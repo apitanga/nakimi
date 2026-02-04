@@ -136,30 +136,45 @@ nakimi github.issues
 
 ### ADR-005: Secure Deletion with shred
 
-**Status**: Accepted
+**Status**: Accepted (updated 2026-02-03)
 
 **Context**:
-- `rm` doesn't actually delete file data
-- Temp files could be recovered from disk
+- `rm` doesn't actually delete file data from physical storage
+- Temp files on disk could be recovered after deletion
 - Need to prevent credential leakage
+- Temp files on RAM-backed filesystems (tmpfs / `/dev/shm`) never touch physical storage, so overwriting is unnecessary there
 
-**Decision**: Use `shred -u` to securely delete temp files
+**Decision**: Use `shred -u` for files on physical storage. Skip it for files already on tmpfs, where a plain `unlink` is sufficient. Fall back to `unlink` if `shred` is unavailable (e.g. macOS).
 
 **Implementation**:
 ```python
-def secure_delete(path: str):
-    """Securely delete file (shred, not rm)"""
-    subprocess.run(['shred', '-u', path], check=True)
+def secure_delete(file_path):
+    path = Path(file_path)
+    if not path.exists():
+        return
+
+    # On tmpfs: data was never on disk, plain delete is fine
+    if is_ram_disk(path):
+        path.unlink()
+        return
+
+    # On physical storage: overwrite then delete (best effort on SSDs)
+    try:
+        subprocess.run(["shred", "-u", str(path)], capture_output=True, check=True)
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        path.unlink()  # fallback if shred unavailable
 ```
 
 **Consequences**:
-- ✅ Prevents file recovery from disk
-- ✅ Defense in depth
-- ❌ Requires `shred` utility (standard on Linux/macOS)
+- ✅ Prevents file recovery when secrets land on physical storage
+- ✅ No unnecessary overwrite passes for files already in RAM (tmpfs)
+- ✅ Graceful fallback — works on macOS and systems without `shred`
+- ⚠️ `shred` is best-effort on SSDs/journaling filesystems (wear leveling can retain old blocks); the primary defense against this is keeping secrets on tmpfs in the first place
 
 **Alternatives Considered**:
-- **os.remove()**: Doesn't overwrite data
-- **Manual overwrite**: Complex, error-prone
+- **os.remove() only**: Doesn't overwrite data on physical storage
+- **Manual overwrite**: Complex, error-prone, same SSD caveats as shred
+- **macOS rm -P**: Works but non-portable; handled here via the fallback path
 
 ---
 
