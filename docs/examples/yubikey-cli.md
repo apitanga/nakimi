@@ -9,11 +9,11 @@ ykman --version
 # Enable YubiKey in Nakimi
 export NAKIMI_YUBIKEY_ENABLED=true
 
-# Configure PIV slot (default: 9a)
-export NAKIMI_YUBIKEY_SLOT=9a
+# Configure PIV slot (default: 1)
+export NAKIMI_YUBIKEY_SLOT=1
 
 # Initialize YubiKey for use with Nakimi
-nakimi yubikey setup --slot 9a
+nakimi yubikey setup --slot 1
 
 # Encrypt existing age key with YubiKey
 nakimi yubikey encrypt-key
@@ -44,7 +44,7 @@ nakimi yubikey decrypt-key
 # Check ykman directly
 ykman info
 ykman piv info
-ykman piv info slot 9a
+ykman piv info slot 1
 ```
 
 ## Environment Variables
@@ -53,8 +53,8 @@ ykman piv info slot 9a
 # Enable YubiKey
 export NAKIMI_YUBIKEY_ENABLED=true
 
-# Set PIV slot (9a is standard for asymmetric encryption)
-export NAKIMI_YUBIKEY_SLOT=9a
+# Set PIV slot (1 is used by default)
+export NAKIMI_YUBIKEY_SLOT=1
 
 # Require touch confirmation (default: true)
 export NAKIMI_YUBIKEY_REQUIRE_TOUCH=true

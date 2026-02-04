@@ -75,8 +75,8 @@ Configure YubiKey via environment variables or config file:
 # Enable YubiKey
 export NAKIMI_YUBIKEY_ENABLED=true
 
-# Configure PIV slot (default: 9a)
-export NAKIMI_YUBIKEY_SLOT=9a
+# Configure PIV slot (default: 1)
+export NAKIMI_YUBIKEY_SLOT=1
 
 # Security settings
 export NAKIMI_YUBIKEY_REQUIRE_TOUCH=true  # Require touch for operations
@@ -88,21 +88,22 @@ export NAKIMI_YUBIKEY_PIN_PROMPT=true     # Prompt for PIN
 Add to `~/.config/nakimi/config`:
 ```ini
 yubikey_enabled=true
-yubikey_slot=9a
+yubikey_slot=1
 yubikey_require_touch=true
 yubikey_pin_prompt=true
 ```
 
 ### PIV Slot Selection
 
-Nakimi uses PIV slot `9a` by default, which is the standard slot for asymmetric cryptography operations. Supported slots:
+Nakimi uses PIV slot `1` by default, which is the standard slot for asymmetric cryptography operations. Supported slots:
 
-- `9a` - Authentication (recommended)
+- `1` - Default authentication slot
+- `9a` - Authentication (alternative)
 - `9c` - Digital Signature
 - `9d` - Key Management
 - `9e` - Card Authentication
 
-**Recommendation**: Use slot `9a` unless you have specific requirements.
+**Recommendation**: Use slot `1` (default) unless you have specific requirements.
 
 ## Usage
 
@@ -115,7 +116,7 @@ Nakimi provides a `yubikey` command group for YubiKey management:
 nakimi yubikey status
 
 # Initialize YubiKey for Nakimi
-nakimi yubikey setup [--slot 9a] [--no-touch] [--no-pin-prompt]
+nakimi yubikey setup [--slot 1] [--no-touch] [--no-pin-prompt]
 
 # Encrypt existing age key with YubiKey
 nakimi yubikey encrypt-key

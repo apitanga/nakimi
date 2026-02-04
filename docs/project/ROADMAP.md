@@ -40,7 +40,7 @@ Establish Nakimi as the most trustworthy credential manager for individual devel
 #### 2. Test Coverage & Automation (Rock-Solid)
 - **Goal**: >85% test coverage with comprehensive CI/CD
 - **Deliverables**:
-  - Increase overall test coverage from 63% to 85%
+  - Increase overall test coverage from 56% to 85%
   - Implement GitHub Actions CI pipeline (test on Linux, macOS, Python 3.9-3.12)
   - Add property-based testing for encryption/decryption functions
   - Integration tests for edge cases and error conditions

@@ -12,13 +12,13 @@ Complete guide to testing nakimi, including architecture, patterns, and lessons 
 
 ## Test Suite Status
 
-**Current Status**: ✅ **All 77 tests passing**
+**Current Status**: ✅ **All 107 tests passing**
 
 | Category | Count | Location |
 |----------|-------|----------|
-| Unit tests | 21 | `tests/unit/` |
-| Integration tests | 56 | `tests/integration/` |
-| **Total** | **77** | `tests/` |
+| Unit tests | 71 | `tests/unit/` |
+| Integration tests | 36 | `tests/integration/` |
+| **Total** | **107** | `tests/` |
 
 **Coverage Goals**:
 - Unit tests: 90%+ coverage of core components (vault, plugin base)
@@ -327,7 +327,7 @@ assert "❌" in output
 
 ## Lessons Learned
 
-From fixing 26 failing tests to 77 passing tests, these lessons emerged:
+From fixing 26 failing tests to 107 passing tests, these lessons emerged:
 
 ### 1. Read the Source Code First
 

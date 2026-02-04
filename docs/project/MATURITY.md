@@ -131,7 +131,7 @@ redirect_from:
 - **Positive Signs**: Good test coverage, documentation, and automation already in place
 
 **Improvement Suggestions**:
-1. Establish versioned releases (v0.1.0, etc.)
+1. Establish versioned releases (v2.0.0, etc.)
 2. Create roadmap document showing planned features
 3. Recruit at least one additional contributor
 4. Consider moving to organization account for project longevity
@@ -161,12 +161,12 @@ redirect_from:
 
 **Rationale**:
 - **Test Structure**:
-  - `tests/unit/`: Unit tests for vault and plugin systems (78 total tests)
+  - `tests/unit/`: Unit tests for vault and plugin systems (107 total tests)
   - `tests/integration/`: CLI integration tests
   - `conftest.py`: Comprehensive fixtures for testing
 - **Test Quality**: Good mocking of external dependencies (age, Gmail API), covers core functionality
 - **Automation**: Git hooks (`pre-commit`, `pre-push`) automatically run tests, blocks commits/pushes on failures
-- **Coverage**: 63% overall (vault: 76%, plugin: 81%, CLI: 55%, Gmail client: 18%)
+- **Coverage**: 56% overall (vault: 67%, plugin: 81%, CLI: 38%, Gmail client: 17%)
 - **CI/CD**: No CI pipeline (GitHub Actions, etc.) configured
 
 **Improvement Suggestions**:

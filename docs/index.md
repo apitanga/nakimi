@@ -39,8 +39,8 @@ Nakimi is a secure, plugin-based API credential management system for AI assista
 - Clear error messages with emoji indicators
 
 ## Project Status
-**Current Version**: 0.1.0 (early development)  
-**Test Coverage**: 63% (78 tests passing)  
+**Current Version**: 2.0.0 (beta)  
+**Test Coverage**: 56% (107 tests total)  
 **Active Development**: Yes
 
 ## Getting Help
