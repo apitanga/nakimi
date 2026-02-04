@@ -23,7 +23,10 @@ except ImportError:
     YUBIKEY_AVAILABLE = False
     YubiKeyManager = None
     YubiKeyError = Exception
-    def is_wsl2(): return False
+
+    def is_wsl2():
+        return False
+
 
 # Version - sync with pyproject.toml
 __version__ = "2.0.0"
