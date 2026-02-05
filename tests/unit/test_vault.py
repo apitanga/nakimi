@@ -258,9 +258,7 @@ class TestSecureDelete:
         mock_run.return_value = mock_result
 
         secure_delete(test_file)
-        mock_run.assert_called_once_with(
-            ["shred", "-u", str(test_file)], capture_output=True, check=True
-        )
+        mock_run.assert_called_once_with(["shred", "-u", str(test_file)], capture_output=True, check=True)
 
     @patch("nakimi.core.vault.is_ram_disk")
     @patch("subprocess.run", side_effect=FileNotFoundError())

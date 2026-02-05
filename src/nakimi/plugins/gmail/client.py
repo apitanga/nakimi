@@ -274,10 +274,7 @@ class GmailClient:
             self._ensure_valid_token()
 
             results = self._execute_with_retry(
-                self.service.users()
-                .messages()
-                .list(userId="me", q=query, maxResults=max_results)
-                .execute
+                self.service.users().messages().list(userId="me", q=query, maxResults=max_results).execute
             )
 
             if not results:
@@ -320,9 +317,7 @@ class GmailClient:
         """List Gmail labels"""
         try:
             self._ensure_valid_token()
-            results = self._execute_with_retry(
-                self.service.users().labels().list(userId="me").execute
-            )
+            results = self._execute_with_retry(self.service.users().labels().list(userId="me").execute)
             return results.get("labels", []) if results else []
         except GmailAuthError:
             return []

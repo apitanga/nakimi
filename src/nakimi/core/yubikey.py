@@ -107,8 +107,7 @@ class YubiKeyManager:
             raise YubiKeyError("No recipient found in age-plugin-yubikey output")
         except FileNotFoundError:
             raise YubiKeyError(
-                "age-plugin-yubikey not found. "
-                "Install it from https://github.com/str4d/age-plugin-yubikey"
+                "age-plugin-yubikey not found. " "Install it from https://github.com/str4d/age-plugin-yubikey"
             )
         except subprocess.CalledProcessError as e:
             raise YubiKeyError(f"Failed to get recipient: {e.stderr}")
@@ -131,8 +130,7 @@ class YubiKeyManager:
             return result.stdout.strip()
         except FileNotFoundError:
             raise YubiKeyError(
-                "age-plugin-yubikey not found. "
-                "Install it from https://github.com/str4d/age-plugin-yubikey"
+                "age-plugin-yubikey not found. " "Install it from https://github.com/str4d/age-plugin-yubikey"
             )
         except subprocess.CalledProcessError as e:
             raise YubiKeyError(f"Failed to get identity: {e.stderr}")
@@ -341,9 +339,7 @@ class YubiKeyManager:
             return False
 
         try:
-            subprocess.run(
-                ["ykman", "piv", "verify-pin", pin], capture_output=True, text=True, check=True
-            )
+            subprocess.run(["ykman", "piv", "verify-pin", pin], capture_output=True, text=True, check=True)
             return True
         except subprocess.CalledProcessError:
             return False

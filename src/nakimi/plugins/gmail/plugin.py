@@ -74,9 +74,7 @@ class GmailPlugin(Plugin):
                     ("limit", "Maximum results", False),
                 ],
             ),
-            PluginCommand(
-                name="labels", description="List Gmail labels", handler=self.cmd_labels, args=[]
-            ),
+            PluginCommand(name="labels", description="List Gmail labels", handler=self.cmd_labels, args=[]),
             PluginCommand(
                 name="profile", description="Show Gmail profile", handler=self.cmd_profile, args=[]
             ),

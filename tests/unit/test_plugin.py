@@ -146,9 +146,7 @@ class TestPluginManager:
             def get_commands(self):
                 return [
                     PluginCommand("cmd1", "Command 1", lambda: "result1", []),
-                    PluginCommand(
-                        "cmd2", "Command 2", lambda x: f"result{x}", [("x", "Argument", True)]
-                    ),
+                    PluginCommand("cmd2", "Command 2", lambda x: f"result{x}", [("x", "Argument", True)]),
                 ]
 
         manager = PluginManager()
@@ -330,9 +328,7 @@ class TestPluginManager:
 
             def get_commands(self):
                 return [
-                    PluginCommand(
-                        "echo", "Echo input", self.cmd_echo, [("text", "Text to echo", True)]
-                    ),
+                    PluginCommand("echo", "Echo input", self.cmd_echo, [("text", "Text to echo", True)]),
                     PluginCommand(
                         "add",
                         "Add numbers",
@@ -379,11 +375,7 @@ class TestPluginManager:
                 pass
 
             def get_commands(self):
-                return [
-                    PluginCommand(
-                        "echo", "Echo input", self.cmd_echo, [("text", "Text to echo", True)]
-                    )
-                ]
+                return [PluginCommand("echo", "Echo input", self.cmd_echo, [("text", "Text to echo", True)])]
 
             def cmd_echo(self, text):
                 return f"Echo: {text}"

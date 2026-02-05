@@ -115,9 +115,7 @@ class PluginManager:
         """
         self.secrets_data = secrets_data or {}
         self._plugins: Dict[str, Plugin] = {}
-        self._commands: Dict[str, tuple[str, PluginCommand]] = (
-            {}
-        )  # full_name -> (plugin_name, command)
+        self._commands: Dict[str, tuple[str, PluginCommand]] = {}  # full_name -> (plugin_name, command)
 
     def register_plugin(self, plugin_class: type[Plugin], plugin_secrets: Optional[Dict] = None):
         """
@@ -183,11 +181,7 @@ class PluginManager:
                     # Find the Plugin subclass
                     for attr_name in dir(module):
                         attr = getattr(module, attr_name)
-                        if (
-                            isinstance(attr, type)
-                            and issubclass(attr, Plugin)
-                            and attr is not Plugin
-                        ):
+                        if isinstance(attr, type) and issubclass(attr, Plugin) and attr is not Plugin:
                             self.register_plugin(attr)
                             break
 

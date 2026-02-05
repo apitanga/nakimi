@@ -40,9 +40,7 @@ class TestYubiKeyManager:
 
             result = yk._check_ykman_installed()
             assert result is True
-            mock_run.assert_called_once_with(
-                ["ykman", "--version"], capture_output=True, check=True
-            )
+            mock_run.assert_called_once_with(["ykman", "--version"], capture_output=True, check=True)
             # Second call should use cached value
             result2 = yk._check_ykman_installed()
             assert result2 is True
@@ -149,9 +147,7 @@ class TestYubiKeyManager:
         # Mock is_available to return True
         with patch.object(yk, "is_available", return_value=True):
             with patch.object(yk, "_check_age_plugin_installed", return_value=True):
-                with patch.object(
-                    yk, "_get_yubikey_recipient", return_value="age1yubikey1testrecipient"
-                ):
+                with patch.object(yk, "_get_yubikey_recipient", return_value="age1yubikey1testrecipient"):
                     with patch("subprocess.run") as mock_run:
                         mock_result = Mock()
                         mock_result.stdout = b"ENCRYPTED_DATA"
@@ -176,9 +172,7 @@ class TestYubiKeyManager:
         # Mock is_available to return True
         with patch.object(yk, "is_available", return_value=True):
             with patch.object(yk, "_check_age_plugin_installed", return_value=True):
-                with patch.object(
-                    yk, "_get_yubikey_identity", return_value="AGE-SECRET-KEY-1TESTIDENTITY"
-                ):
+                with patch.object(yk, "_get_yubikey_identity", return_value="AGE-SECRET-KEY-1TESTIDENTITY"):
                     with patch("tempfile.NamedTemporaryFile") as mock_temp:
                         mock_file = MagicMock()
                         mock_file.name = "/tmp/mock.age"
@@ -193,9 +187,7 @@ class TestYubiKeyManager:
                             with patch("os.unlink") as mock_unlink:
                                 decrypted = yk.decrypt_age_key(b"ENCRYPTED_DATA")
                                 assert decrypted == "DECRYPTED_DATA"
-                                mock_file.write.assert_called_once_with(
-                                    "AGE-SECRET-KEY-1TESTIDENTITY"
-                                )
+                                mock_file.write.assert_called_once_with("AGE-SECRET-KEY-1TESTIDENTITY")
                                 mock_run.assert_called_once_with(
                                     ["age", "-d", "-i", "/tmp/mock.age"],
                                     input=b"ENCRYPTED_DATA",
@@ -246,9 +238,7 @@ class TestYubiKeyManager:
         with patch.object(yk, "is_available", return_value=True):
             with patch(
                 "subprocess.run",
-                side_effect=subprocess.CalledProcessError(
-                    1, "ykman piv verify-pin", stderr="Wrong PIN"
-                ),
+                side_effect=subprocess.CalledProcessError(1, "ykman piv verify-pin", stderr="Wrong PIN"),
             ):
                 result = yk.verify_pin("wrong")
                 assert result is False
@@ -294,9 +284,7 @@ class TestYubiKeyManager:
         with patch.object(yk, "is_available", return_value=True):
             with patch(
                 "subprocess.run",
-                side_effect=subprocess.CalledProcessError(
-                    1, "ykman piv change-pin", stderr="Wrong old PIN"
-                ),
+                side_effect=subprocess.CalledProcessError(1, "ykman piv change-pin", stderr="Wrong old PIN"),
             ):
                 result = yk.change_pin("wrong", "new")
                 assert result is False

@@ -291,9 +291,7 @@ class Vault:
         try:
             subprocess.run(["age", "--version"], capture_output=True, check=True)
         except (subprocess.CalledProcessError, FileNotFoundError):
-            raise VaultCryptoError(
-                "age is not installed. Install it from https://age-encryption.org"
-            )
+            raise VaultCryptoError("age is not installed. Install it from https://age-encryption.org")
 
     def generate_key(self) -> str:
         """Generate a new age key pair"""
