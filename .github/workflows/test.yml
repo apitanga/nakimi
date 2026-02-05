@@ -26,6 +26,14 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     
+    - name: Install age encryption tool
+      run: |
+        wget -q https://github.com/FiloSottile/age/releases/download/v1.2.0/age-v1.2.0-linux-amd64.tar.gz
+        tar -xzf age-v1.2.0-linux-amd64.tar.gz
+        sudo mv age/age /usr/local/bin/
+        sudo mv age/age-keygen /usr/local/bin/
+        rm -rf age age-v1.2.0-linux-amd64.tar.gz
+    
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
@@ -55,6 +63,14 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+    
+    - name: Install age encryption tool
+      run: |
+        wget -q https://github.com/FiloSottile/age/releases/download/v1.2.0/age-v1.2.0-darwin-amd64.tar.gz
+        tar -xzf age-v1.2.0-darwin-amd64.tar.gz
+        sudo mv age/age /usr/local/bin/
+        sudo mv age/age-keygen /usr/local/bin/
+        rm -rf age age-v1.2.0-darwin-amd64.tar.gz
     
     - name: Install Python dependencies
       run: |
