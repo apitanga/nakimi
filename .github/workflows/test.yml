@@ -77,7 +77,7 @@ jobs:
     
     - name: Run linting with flake8
       run: |
-        flake8 src/ tests/ --count --max-complexity=10 --statistics
+        flake8 src/ tests/ --count --max-line-length=110 --max-complexity=10 --statistics
     
   test-macos:
     runs-on: macos-latest
@@ -145,7 +145,7 @@ jobs:
     
     - name: Run linting with flake8
       run: |
-        flake8 src/ tests/ --count --max-complexity=10 --statistics
+        flake8 src/ tests/ --count --max-line-length=110 --max-complexity=10 --statistics
     
   type-check:
     runs-on: ubuntu-latest
