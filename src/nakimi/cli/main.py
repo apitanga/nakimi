@@ -318,9 +318,7 @@ def cmd_yubikey(args):  # noqa: C901
 
     if not args.yubikey_command:
         print("❌ No yubikey command specified")
-        print(
-            "   Available commands: setup, status, encrypt-key, decrypt-key, verify-pin, change-pin"
-        )
+        print("   Available commands: setup, status, encrypt-key, decrypt-key, verify-pin, change-pin")
         sys.exit(1)
 
     try:
@@ -359,9 +357,7 @@ def cmd_yubikey(args):  # noqa: C901
             print("   YubiKey will be used for age key encryption")
             print("   Note: age-plugin-yubikey must be installed for encryption/decryption")
             print()
-            print(
-                "⚠️  IMPORTANT: Run 'nakimi yubikey encrypt-key' to encrypt your existing age key"
-            )
+            print("⚠️  IMPORTANT: Run 'nakimi yubikey encrypt-key' " "to encrypt your existing age key")
 
         elif args.yubikey_command == "status":
             print("🔍 Checking YubiKey status...")
@@ -592,9 +588,7 @@ YubiKey commands (optional):
     yubikey_sub.add_parser("status", help="Check YubiKey status and configuration")
 
     # yubikey encrypt-key
-    encrypt_parser = yubikey_sub.add_parser(
-        "encrypt-key", help="Encrypt existing age key with YubiKey"
-    )
+    encrypt_parser = yubikey_sub.add_parser("encrypt-key", help="Encrypt existing age key with YubiKey")
     encrypt_parser.add_argument("--slot", default="9a", help="PIV slot to use (default: 9a)")
 
     # yubikey decrypt-key (for testing)
