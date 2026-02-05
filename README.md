@@ -14,7 +14,6 @@ A personal vault that stores API credentials encrypted at rest, decrypts them ju
 
 ```bash
 brew install age          # macOS
-sudo apt install age      # Ubuntu/Debian
 sudo dnf install age      # Fedora
 ```
 
