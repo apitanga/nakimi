@@ -26,33 +26,33 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     
-    - name: Install age encryption tool
-      run: |
-        # Try to install age using system package manager first
-        if [ "$RUNNER_OS" == "Linux" ]; then
-          sudo apt-get update
-          sudo apt-get install -y age || {
-            echo "Package manager installation failed, installing from GitHub releases..."
-            wget -q https://github.com/FiloSottile/age/releases/download/v1.1.1/age-v1.1.1-linux-amd64.tar.gz
-            tar -xzf age-v1.1.1-linux-amd64.tar.gz
-            sudo mv age/age /usr/local/bin/
-            sudo mv age/age-keygen /usr/local/bin/
-            rm -rf age age-v1.1.1-linux-amd64.tar.gz
-          }
-        elif [ "$RUNNER_OS" == "macOS" ]; then
-          brew install age || {
-            echo "Homebrew installation failed, installing from GitHub releases..."
-            wget -q https://github.com/FiloSottile/age/releases/download/v1.1.1/age-v1.1.1-darwin-amd64.tar.gz
-            tar -xzf age-v1.1.1-darwin-amd64.tar.gz
-            sudo mv age/age /usr/local/bin/
-            sudo mv age/age-keygen /usr/local/bin/
-            rm -rf age age-v1.1.1-darwin-amd64.tar.gz
-          }
-        fi
+    # - name: Install age encryption tool
+    #   run: |
+    #     # Try to install age using system package manager first
+    #     if [ "$RUNNER_OS" == "Linux" ]; then
+    #       sudo apt-get update
+    #       sudo apt-get install -y age || {
+    #         echo "Package manager installation failed, installing from GitHub releases..."
+    #         wget -q https://github.com/FiloSottile/age/releases/download/v1.1.1/age-v1.1.1-linux-amd64.tar.gz
+    #         tar -xzf age-v1.1.1-linux-amd64.tar.gz
+    #         sudo mv age/age /usr/local/bin/
+    #         sudo mv age/age-keygen /usr/local/bin/
+    #         rm -rf age age-v1.1.1-linux-amd64.tar.gz
+    #       }
+    #     elif [ "$RUNNER_OS" == "macOS" ]; then
+    #       brew install age || {
+    #         echo "Homebrew installation failed, installing from GitHub releases..."
+    #         wget -q https://github.com/FiloSottile/age/releases/download/v1.1.1/age-v1.1.1-darwin-amd64.tar.gz
+    #         tar -xzf age-v1.1.1-darwin-amd64.tar.gz
+    #         sudo mv age/age /usr/local/bin/
+    #         sudo mv age/age-keygen /usr/local/bin/
+    #         rm -rf age age-v1.1.1-darwin-amd64.tar.gz
+    #       }
+    #     fi
         
-        # Verify installation
-        age --version
-        age-keygen --version
+    #     # Verify installation
+    #     age --version
+    #     age-keygen --version
     
     - name: Install Python dependencies
       run: |
