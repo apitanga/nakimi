@@ -13,6 +13,7 @@ Nakimi is a secure, plugin-based API credential management system for AI assista
 ## Quick Links
 
 - **[Getting Started](./getting-started/)** - Installation and setup guides
+- **[Examples](./examples/)** - Practical examples and usage patterns
 - **[Plugins](./plugins/)** - Plugin setup and configuration
 - **[Development](./development/)** - Plugin development and architecture
 - **[Security](./security/)** - Security architecture and policies

@@ -1,3 +1,9 @@
+---
+title: YubiKey CLI Examples
+nav_order: 16
+parent: Examples
+---
+
 # YubiKey CLI Examples
 
 ## Basic Setup
