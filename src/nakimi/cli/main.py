@@ -184,6 +184,17 @@ def cmd_run(args):
         sys.exit(1)
 
 
+def cmd_serve(args):
+    """Start MCP server for AI assistant integration"""
+    try:
+        from nakimi.mcp_server import run_server
+    except ImportError:
+        print("MCP server requires the 'mcp' package.")
+        print("Install with: pip install nakimi[mcp]")
+        sys.exit(1)
+    run_server()
+
+
 def cmd_upgrade(args):
     """Upgrade nakimi to latest version from GitHub"""
     repo_url = "https://github.com/apitanga/nakimi.git"
@@ -603,6 +614,9 @@ YubiKey commands (optional):
     change_parser.add_argument("old_pin", help="Current PIN")
     change_parser.add_argument("new_pin", help="New PIN")
 
+    # serve command (MCP server)
+    subparsers.add_parser("serve", help="Start MCP server for AI assistant integration")
+
     # upgrade command
     upgrade_parser = subparsers.add_parser("upgrade", help="Upgrade to latest version from GitHub")
     upgrade_parser.add_argument(
@@ -631,6 +645,7 @@ YubiKey commands (optional):
         "plugins": cmd_plugins,
         "session": cmd_session,
         "upgrade": cmd_upgrade,
+        "serve": cmd_serve,
         "yubikey": cmd_yubikey,
     }
 

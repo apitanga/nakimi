@@ -45,9 +45,13 @@ dev = [
 yubikey = [
     "yubikey-manager>=5.0.0",
 ]
+mcp = [
+    "mcp>=1.0.0",
+]
 
 [project.scripts]
 nakimi = "nakimi.cli.main:main"
+nakimi-mcp = "nakimi.mcp_server:run_server"
 
 [project.urls]
 Homepage = "https://github.com/apitanga/nakimi"
